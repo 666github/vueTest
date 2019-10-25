@@ -11,22 +11,18 @@
         <div id="app"> </div>
     <script>
         /*
-           前两种都是都是父子组件之间的传递，如果不是父子关系，可以使用中央事件总线的方式。 
-           新建一个vue事件bus对象，通过bus.$emit触发全局事件，bus.$on监听全局事件。
+           父组件中通过provider来提供变量，然后在子组件中通过inject来注入变量。
+           不论子组件有多深，只要调用了inject那么就可以注入provider中的数据，而不是局限于只能在当前父组件的prop属性来获取数据，
+           只要在父组件的生命周期内，子组件都可以调用。
         */ 
-        // 中央事件总线
-        var bus=new Vue();
-        Vue.component('brother2', {
+        Vue.component('Child', {
             data(){
                 return {
-                    msg:'hello brother2'
+                    msg:''
                 }
             },
             template:`
-                <div>
-                    <p>i am 2</p>
-                    <input type='text' v-model='msg' @input='passData(msg)'/>
-                </div>
+                <div></div>
             `,
             methods:{
                passData(val){
@@ -35,26 +31,7 @@
                }
             }
         })
-        Vue.component('brother1', {
-            data(){
-                return {
-                    msg:'hello brother1',
-                    brother2Msg:''
-                }
-            },
-            template:`
-                <div>
-                    <p>i am 1{{msg}}</p>
-                    <p>洞2传递过来的数据：{{brother2Msg}}</p>
-                </div>
-            `,
-            mounted(){
-            //绑定全局事件globalEvent
-               bus.$on('globalEvent',(val)=>{
-                    this.brother2Msg=val;
-               })
-            }
-        })
+        
         var App={//声子
             data() {
                 return {
