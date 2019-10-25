@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>$attrs和$listeners</title>
+</head>
+<script src=".././node_modules/vue/dist/vue.min.js"></script>
+<body>
+        <div id="app"> </div>
+    <script>
+        /*
+            $attrs和$listeners
+            1.第一种组件通信有个问题：如果父组件A下面有组件B，B下面有组件C，那么A要传入C第一种方法太复杂（A通过props传给B，B再通过props传给c）
+            2.A直接传入C：vue2.4提供了$attrs和$listeners解决这个问题
+
+            父级A自定义事件、自定义绑定属性，然后中间组件绑定$attrs和$listeners。最后一级子组件通过$attrs调用父级属性，通过$emit触发父级自定义事件。
+        */ 
+        Vue.component('C', {           
+            template:`
+                <div>
+                    <div @click="cClickHandler">{{$attrs.messagec}}--{{$attrs.msg}}</div>
+                </div>
+            `,
+            methods:{
+                cClickHandler(){
+                    // console.log("c");
+                    this.$emit('getCData','c的数据');
+                }
+            }
+        })
+        // Vue.component('B', {        
+        //     template:`
+        //         <div>
+        //             <C v-bind="$attrs" v-on="$listeners"></C>
+        //         </div>
+        //         `
+            
+        // })
+        Vue.component('A', {
+            template:`
+                <div>
+                    <C v-bind="$attrs" v-on="$listeners"></C>
+                </div>
+            `,
+            methods:{
+               
+            }
+        })
+        var App={//声子
+            data() {
+                return {
+                    messagec:'hello c',
+                    msg:"我是父组件的内容"
+                }
+            },
+           
+            template:`
+                <div>
+                    <p>这是一个父组件：</p>
+                    <A :messagec='messagec' :msg='msg' v-on:getCData='getCData'></A>
+                </div>
+            `,
+            methods: {
+                //执行c组件触发的函数
+                getCData(val){
+                    console.log(val);
+                }
+            }
+            
+        }
+        new Vue({
+            el:'#app',
+            components:{//挂子
+                App
+            },//用子
+            template:`
+                <App/>
+            `
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<script src=".././node_modules/vue/dist/vue.min.js"></script>
+<body>
+    <div id="app">
+
+    </div>
+    <script>
+        Vue.component('myLi', {
+            template:`
+                <li>
+                    <span>first:</span><slot name='first'/>
+                    <span>second:</span><slot name='second'/>
+                    <span>third:</span><slot name='third'/>
+                </li>
+            `
+        })
+        var App={
+            template:`
+                <div>
+                    <ul>
+                        <myLi>
+                            <span slot='first'>slotF</span>
+                            <span slot='second'>slotS</span>
+                        </myLi>
+                    </ul>
+                </div>
+            `
+        }
+        new Vue({
+            el:'#app',
+            components:{
+                App
+            },
+            template:`
+                <App/>
+            `
+        })
+    </script>
+</body>
+</html>

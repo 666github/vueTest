@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>南锣filter</title>
+</head>
+<script src=".././node_modules/vue/dist/vue.min.js"></script>
+<body>
+    <div id="app">
+
+    </div>
+    <script>
+        //全局过滤器
+        Vue.filter('myReverse', function(val,arg){
+            return val.split('').reverse().join('')+ arg;
+        })
+        Vue.filter('currentPrice', function(val){
+            return val;
+        })
+        var App={
+            data() {
+                return {
+                    price:0,
+                    msg:'南锣古巷'
+                }
+            },
+            template:`
+                <div>
+                    <input type='number' v-model='price' />
+                    <h3>{{price | currentPrice}}</h3>
+                    <h4>{{msg | myReverse('翻转')}}
+                </div>
+            `,
+            filters:{
+                //声明过滤器
+                currentPrice(value){
+                    return "¥"+ value;
+                }
+            }
+        }
+        new Vue({
+            el:'#app',
+            components:{
+                App
+            },
+            template:`
+                <App/>
+            `
+        })
+    </script>
+</body>
+</html>

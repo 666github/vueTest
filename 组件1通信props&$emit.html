@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>props和$emit</title>
+</head>
+<script src=".././node_modules/vue/dist/vue.min.js"></script>
+<body>
+        <div id="app"> </div>
+    <script>
+        /*
+            1.props和$emit
+            父组件向子组件传递数据是通过prop传递的；子组件向父组件传递数据：通过$emit触发父组件自定义事件，子组件给该事件传入参数
+            //下面例子中，父组件App和子组件Child
+            a.父组件传递了message数据给子组件，并且通过v-on绑定了一个getChild事件来监听子组件的触发事件
+            b.子组件通过props得到相关的message数据，最后通过this.$emit触发getChild事件
+        */ 
+        Vue.component('Child', {
+            data(){
+                return {
+
+                }
+            },
+            props:["message"],
+            template:`
+                <div>
+                    <input type='text' v-model="message" @input='$emit("getChild","参数message")' >
+                    <span>{{message}}</span>
+                </div>
+            `
+        })
+        var App={//声子
+            data() {
+                return {
+                    message:'来自父组件',
+                }
+            },
+           
+            template:`
+                <div>
+                    <Child v-on:getChild="toChildData"></Child>
+                </div>
+            `,
+            methods: {
+                toChildData(val){
+                    console.log(this.message,val);//来自父组件，参数message
+                }
+            }
+            
+        }
+        new Vue({
+            el:'#app',
+            components:{//挂子
+                App
+            },//用子
+            template:`
+                <App/>
+            `
+        })
+    </script>
+</body>
+</html>
