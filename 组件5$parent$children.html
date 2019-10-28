@@ -11,14 +11,14 @@
         <div id="app"> </div>
     <script> 
         Vue.component('Child', {
+            props:{
+                value:String
+            },
             data(){
                 return {
                     mymessage:this.value
                 }
-            },
-            props:{
-                value:String
-            },
+            },           
             template:`
                 <div>
                     <input type='text' v-model='mymessage' @input='changeVal' />
