@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>中央事件</title>
+</head>
+<script src=".././node_modules/vue/dist/vue.min.js"></script>
+<body>
+        <div id="app"> </div>
+    <script> 
+        Vue.component('Child', {
+            data(){
+                return {
+                    mymessage:this.value
+                }
+            },
+            props:{
+                value:String
+            },
+            template:`
+                <div>
+                    <input type='text' v-model='mymessage' @input='changeVal' />
+                </div>
+            `,
+            methods:{
+               changeVal(val){console.log(this)
+                this.$parent.message=this.mymessage;//通过如此调用可以改变父组件的值
+               }
+            }
+        })
+        Vue.component('Parent', {
+            data(){
+                return {
+                    message:'Hello-parent'
+                }
+            },
+            template:`
+                <div>
+                    <p>this is parent {{message}}</p>
+                    <button @click='changeParent'>parent click</button>
+                    <Child/>
+                </div>
+            `,
+            methods:{
+               changeParent(val){
+                this.$children[0].mymessage=this.message;
+               }
+            }
+        })
+        var App={//声子
+            data() {
+                return {
+                    msg:"我"                 
+                }
+            },          
+            template:`
+                <div>
+                    <Parent/>
+                </div>
+            `
+        }
+        new Vue({
+            el:'#app',
+            components:{//挂子
+                App
+            },//用子
+            template:`
+                <App/>
+            `
+        })
+    </script>
+</body>
+</html>
