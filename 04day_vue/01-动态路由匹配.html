@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<script src="vue.min.js"></script>
+<script src="vue-router.js"></script>
+<body>
+    <div id="app"></div>
+</body>
+<script>
+    /*
+        当使用路由参数时，例如从/timeline/frontend到/timeline/backend，原来的组件实例会被复用，因为两个组件都渲染同个组件，比起销毁再建，
+        复用显得效率更高效。这也意味着组件的生命周期钩子不会再被调用。
+    */ 
+    var ComDesc={
+        data(){
+            return{
+                msg:''
+            }
+        },
+        template:`
+            <div>
+             <span>comdesc-{{msg}}</span>
+             <input type='text' v-model='msg'/>
+            </div>
+        `,
+        created() {
+            //发ajax
+            this.msg="msg"
+        },
+        
+    }
+    var TimeLine={
+        template:`
+            <div>
+                <router-link :to="{name:'comDesc',params:{id:'frontend'}}">qianduan</router-link>
+                <router-view></router-view>
+            </div>
+        `,
+        //在当前组件内部，监听路由信息的变化 在父级中监听子路由变化
+        watch: {
+            '$route'(to,from){
+                console.log(to);//去往的界面
+                console.log(from);//来自于哪个界面
+                this.msg=to.params.id;
+                console.log(this.msg);
+            }
+        }
+    }
+    var Pins={
+        template:`
+            <div>沸点</div>
+        `
+    }
+    const router = new VueRouter({
+        routes: [
+            {
+                path:'/timeline',
+                component:TimeLine,
+                children:[
+                    {
+                        name:'comDesc',
+                        // 动态路由参数以冒号开头
+                        path:'/timeline/:id',
+                        component:ComDesc
+                    }
+                ]
+            },
+            {
+                path:'/pins',
+                component:Pins
+            }
+        ]
+    })
+    var App={
+        template:`
+            <div>
+                <router-link to='/timeline' style='color:red'>home</router-link>
+                <router-link to='/pins'>fudian</router-link>
+                <router-view></router-view>
+            </div>
+        `
+    }
+    new Vue({
+        el:'#app',
+        components:{
+            App
+        },
+        router,
+        template:`
+            <App/>
+        `
+    })
+</script>
+</html>

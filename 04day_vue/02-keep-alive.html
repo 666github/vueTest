@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>keep-alive</title>
+</head>
+<script src="vue.min.js"></script>
+<script src="vue-router.js"></script>
+<body>
+    <div id="app"></div>
+</body>
+<script>
+    var ComDesc={
+        data(){
+            return{
+                msg:''
+            }
+        },
+        template:`
+            <div>
+             <span>comdesc-{{msg}}</span>
+             <input type='text' v-model='msg'/>
+            </div>
+        `,
+        created() {
+            //发ajax
+            this.msg="msg"
+        },
+        
+    }
+    var TimeLine={
+        template:`
+            <div id='timeline'>
+                首页
+            </div>
+        `,
+        created() {
+            console.log('首页组件创建timeline');
+        },
+        mounted() {
+            console.log('首页组件DOM加载timeline');
+        },
+        destroyed() {
+            console.log('首页组件销毁timeline');
+        }
+    }
+    var Pins={
+        template:`
+            <div>
+                <span @click='clickHandler'>沸点</span>
+            </div>
+        `,
+        methods: {
+            clickHandler(e){
+                e.target.style.color="yellow";
+            }
+        },
+        created() {
+            console.log('首页组件创建pins');
+        },
+        mounted() {
+            console.log('首页组件DOM加载pins');
+        },
+        destroyed() {
+            console.log('首页组件销毁pins');
+        }
+    }
+    const router = new VueRouter({
+        routes: [
+            {
+                path:'/timeline',
+                component:TimeLine,
+                children:[
+                    {
+                        name:'comDesc',
+                        // 动态路由参数以冒号开头
+                        path:'/timeline/:id',
+                        component:ComDesc
+                    }
+                ]
+            },
+            {
+                path:'/pins',
+                component:Pins
+            }
+        ]
+    })
+    var App={//keep-alive有缓存，不会存在重新创建与销毁
+        template:`
+            <div>
+                <router-link to='/timeline' style='color:red'>home</router-link>
+                <router-link to='/pins'>feidian</router-link>                
+                <keep-alive>
+                    <router-view>
+                    </router-view>
+                </keep-alive>
+            </div>
+        `
+    }
+    new Vue({
+        el:'#app',
+        components:{
+            App
+        },
+        router,
+        template:`
+            <App/>
+        `
+    })
+</script>
+</html>

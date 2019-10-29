@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>meta</title>
+</head>
+<script src="vue.min.js"></script>
+<script src="vue-router.js"></script>
+<body>
+    <div id="app">
+        <router-link to='/home'>首页</router-link>
+        <router-link to='/blog'>导航</router-link>
+        <router-link to='/login'>登录</router-link>
+        <a href="javascript:void(0)">退出</a>
+        <router-view></router-view>
+    </div>
+</body>
+<script>
+    var Home={
+        template:`
+            <div>is home</div>
+        `
+    }
+    var Blog={
+        template:`
+            <div>is nav</div>
+        `
+    }
+    var Login={
+        data() {
+            return {
+                name:'',
+                psw:''
+            }
+        },
+        template:`
+            <div>
+                <input type='text' v-model='name' />
+                <input type='password' v-model='psw' />
+                <input type='button' value='登录' @click='loginHandler' />
+            </div>
+        `,
+        methods: {
+            loginHandler(){
+                console.log('denglu');
+            }
+        },
+    }
+    const router = new VueRouter({
+        routes: [
+            {
+                path:'/',
+                redirect:'/home'              
+            },
+            {
+                path:'/home',
+                component:Home,              
+            },
+            {
+                path:'/blog',
+                component:Blog,
+                //给未来路由做权限控制
+                meta:{
+                    // 证明用户访问该组件的时候需要登录
+                    auth:true
+                }              
+            }
+        ]
+    })
+    router.beforeEach((to, from, next) => {
+        // to and from are both route objects. must call `next`.
+        console.log(to);
+        console.log(from);
+        if(to.meta.auth){//跳转到导航
+            next({
+                path:'/login'
+            });
+        }else{debugger
+            next();
+        }       
+    })
+    new Vue({
+        el:'#app',    
+        router,    
+    })
+</script>
+</html>
