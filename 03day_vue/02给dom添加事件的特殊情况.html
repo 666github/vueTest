@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>dom事件特殊情况</title>
+</head>
+<script src="./vue.min.js"></script>
+<body>
+        <div id="app"> </div>
+    <script> 
+    // Vue.component('subCom', {
+    //     template:`
+    //         <div>subcom</div>
+    //     `
+    // });
+        var App={//声子
+            data(){
+                return{
+                    isShow:false
+                }
+            },
+            template:`
+                <div class='app'>
+                    <input type='text' v-show='isShow' ref='input' @focus='focusFun'/>
+                </div>
+            `,
+            mounted() {
+                this.isShow=true;
+                this.$nextTick(()=>{//在dom更新循环结束之后执行回调函数，修改数据之后使用此方法在回调中获取更新之后的dom
+                    this.$refs.input.focus();
+                })
+            },
+            methods: {
+                focusFun(){
+                    console.log('focus');
+                }
+            },
+        };
+        new Vue({
+            el:'#app',
+            data(){
+                return{
+
+                }
+            },
+            components:{//挂子
+                App
+            },//用子
+            template:`
+                <App/>
+            `
+        })
+    </script>
+</body>
+</html>

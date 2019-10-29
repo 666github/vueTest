@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>router的原理</title>
+</head>
+<body>
+    <!-- 
+        路由实现：1）传统开发方式url改变后，立刻发送请求响应整个页面，资源过多容易造成白屏。
+                2)spa单页面应用：锚点值改变后不会立刻发送请求，而是在合适的时机发起ajax请求，页面局部渲染。
+     -->
+    <a href="#/login">登录</a>
+    <a href="#/register">注册</a>
+    <div id="app"> </div>
+    <script> 
+    var oDiv=document.getElementById("app");
+    window.onhashchange=function(){
+        console.log(location.hash);
+        switch (location.hash) {
+            case '#/login':
+                oDiv.innerHTML=`<h3>this is loginPage</h3>`
+                break;
+            case '#/register':
+                oDiv.innerHTML=`<h3>this is registerPage</h3>`
+                break;
+            default:
+                break;
+        }
+    }
+    </script>
+</body>
+</html>
