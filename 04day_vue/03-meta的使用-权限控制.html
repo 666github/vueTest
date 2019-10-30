@@ -11,13 +11,14 @@
 <body>
     <div id="app">
         <router-link to='/home'>首页</router-link>
-        <router-link to='/blog'>导航</router-link>
+        <router-link to='/blog'>微博</router-link>
         <router-link to='/login'>登录</router-link>
         <a href="javascript:void(0)">退出</a>
         <router-view></router-view>
     </div>
 </body>
 <script>
+
     var Home={
         template:`
             <div>is home</div>
@@ -25,7 +26,7 @@
     }
     var Blog={
         template:`
-            <div>is nav</div>
+            <div>is weibo</div>
         `
     }
     var Login={
@@ -44,7 +45,12 @@
         `,
         methods: {
             loginHandler(){
-                console.log('denglu');
+                //需要再做一个验证 不为空值
+                localStorage.setItem('user', JSON.stringify({name:this.name,psw:this.psw}));//需要将对象转为字符串
+                //编程式导航
+                this.$router.push({
+                    name:'blog'
+                })
             }
         },
     }
@@ -60,12 +66,17 @@
             },
             {
                 path:'/blog',
+                name:'blog',
                 component:Blog,
                 //给未来路由做权限控制
                 meta:{
                     // 证明用户访问该组件的时候需要登录
                     auth:true
                 }              
+            },
+            {
+                path:'/login',
+                component:Login,              
             }
         ]
     })
@@ -74,12 +85,17 @@
         console.log(to);
         console.log(from);
         if(to.meta.auth){//跳转到导航
-            next({
-                path:'/login'
-            });
-        }else{debugger
+            if(JSON.parse(localStorage.getItem('user'))){//字符串转为json对象     
+                next();//不然会卡主
+                localStorage.clear();
+            }else{
+                next({
+                    path:'/login'
+                });
+            }               
+        }else{
             next();
-        }       
+        }   
     })
     new Vue({
         el:'#app',    

@@ -32,24 +32,24 @@
             //发ajax
             this.msg="msg"
         },
+        watch: {//子路由发生变化时
+            '$route'(to,from){
+                console.log(to);//去往的界面
+                console.log(from);//来自于哪个界面
+                this.msg=to.params.id;
+            }
+        }
         
     }
     var TimeLine={
         template:`
             <div>
                 <router-link :to="{name:'comDesc',params:{id:'frontend'}}">qianduan</router-link>
+                <router-link :to="{name:'comDesc',params:{id:'backend'}}">houduan</router-link>
                 <router-view></router-view>
             </div>
-        `,
-        //在当前组件内部，监听路由信息的变化 在父级中监听子路由变化
-        watch: {
-            '$route'(to,from){
-                console.log(to);//去往的界面
-                console.log(from);//来自于哪个界面
-                this.msg=to.params.id;
-                console.log(this.msg);
-            }
-        }
+        `
+        
     }
     var Pins={
         template:`
