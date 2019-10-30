@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>meta</title>
+</head>
+<script src="vue.min.js"></script>
+<script src="vue-router.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<body>
+    <div id="app">
+        <router-link to='/home'>首页</router-link>
+        <router-view></router-view>
+    </div>
+</body>
+<script>
+    // import axios from 'axios';
+    debugger
+    
+    var Home={
+        template:`
+            <div>is home</div>
+        `
+    }
+    var Blog={
+        template:`
+            <div>is weibo</div>
+        `
+    }
+    
+    const router = new VueRouter({
+        routes: [
+            {
+                path:'/',
+                redirect:'/home'              
+            },
+            {
+                path:'/home',
+                component:Home,              
+            }
+        ]
+    })
+    new Vue({
+        el:'#app',    
+        router
+    })
+</script>
+</html>
