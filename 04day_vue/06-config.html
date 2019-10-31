@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>axios</title>
+    <title>axios-config</title>
 </head>
 <script src="vue.min.js"></script>
 <script src="vue-router.js"></script>
@@ -20,38 +20,34 @@
     var Home={
         data() {
             return {
-                lists:[],
-                email:''
+                res1:''
             }
         },
         template:`
             <div>
-                is home<button @click='sendAjax'>send</button>
-                <div id='oP'>
-                    <p v-for='item in lists' :key='item.id'>{{item.name}}</p>
-                    <h3>{{email}}</h3>
-                </div>
+                <button @click='sendAjax'>send</button>
             </div>
         `,
-        mounted() {
-            axios.get('http://jsonplaceholder.typicode.com/users')
-            .then(res=>{
-                this.lists=res.data;
-            }).catch(e=>{
-                console.log(e);
-            })
-        },
         methods: {
             sendAjax(){
-                this.$axios.get('http://jsonplaceholder.typicode.com/users')
-                .then(res=>{
-                    this.email=res.data[0].email;
-                    // console.log(res.data[0].email);
+                //请求1get 请求2post
+                this.$axios.defaults.baseURL='http://jsonplaceholder.typicode.com/';
+                this.$axios.get('todos',{
+                    params:{id:1},
+                    transformResponse:[//传递给then/catch前，允许修改响应数据
+                        function (data) {
+                            //对data进行任意转换
+                            console.log(data,typeof data);//string
+                            console.log(JSON.parse(data));
+                        }
+                    ]
+                }).then(res=>{
+                    // console.log(res.data.id);
                 }).catch(err=>{
-                    console.log('err:',err);
-                })
+                    console.log(err);
+                })               
             }
-        },
+        }
     }
     const router = new VueRouter({
         routes: [
