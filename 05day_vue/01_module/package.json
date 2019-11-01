@@ -1,0 +1,19 @@
+{
+  "name": "01_module",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack --mode development",
+    "pro": "webpack --mode production",
+    "dev:server": "webpack-dev-server --mode production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^4.41.2"
+  },
+  "dependencies": {},
+  "description": ""
+}
