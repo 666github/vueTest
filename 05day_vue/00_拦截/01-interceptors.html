@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>axios-config</title>
+</head>
+<script src="vue.min.js"></script>
+<script src="vue-router.js"></script>
+<script src="./node_modules/axios/dist/axios.js"></script>
+<body>
+    <div id="app">
+        <router-link to='/home'>首页</router-link>
+        <router-view></router-view>
+    </div>
+</body>
+<script>
+    // import axios from 'axios';
+    var Home={
+        data() {
+            return {
+                isShow:false
+            }
+        },
+        template:`
+            <div>
+                <button @click='sendAjax'>send</button>
+            </div>
+        `,
+        methods: {
+            sendAjax(){
+                // 模拟类似cookie的机制
+               //添加请求拦截器
+                this.$axios.interceptors.request.use((config)=>{
+                    console.log(config);
+                    // var token=localStorage.getItem('token');
+                    // if(token){
+                    //     config.headers['token']=token;
+                    // }
+                    this.isShow=true;
+                    return config;
+                },function(err){
+                    return Promise.reject(err);
+                });
+                // 添加响应拦截器
+                this.$axios.interceptors.response.use((response)=>{
+                    // console.log(response.data.token);
+                    // if(response.data.token){
+                    //     localStorage.setItem('token',resopnse.data.token);                       
+                    // }
+                    this.isShow=false;
+                    console.log(response);
+                     return response;
+                },function(err){
+                    // 对响应错误做点什么
+                    return Promise.reject(err);
+                });
+               //发送请求
+               this.$axios.get('http://jsonplaceholder.typicode.com/users')
+               .then(res=>{
+                   console.log(res);
+               }).catch(err=>{
+                   console.log(err);
+               })
+            }
+        }
+    }
+    const router = new VueRouter({
+        routes: [
+            {
+                path:'/',
+                redirect:'/home'              
+            },
+            {
+                path:'/home',
+                component:Home,              
+            }
+        ]
+    })
+    Vue.prototype.$axios= axios;
+    new Vue({
+        el:'#app',    
+        router,       
+    })
+</script> 
+</html>
