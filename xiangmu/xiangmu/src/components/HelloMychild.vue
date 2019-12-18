@@ -120,12 +120,114 @@ export default {
 
   // promise异步编程的一种解决方案 容器保存着未来才会结束的事件的结果
     // then方法指定的回调函数，将在当前脚本所有同步任务执行完才会执行
+    // 如果异步操作抛出错误，状态就会变为rejected，就会调用catch方法指定的回调函数，处理这个错误。另外，then方法指定的回调函数，如果运行中抛出错误，也会被catch方法捕获。
+    // 一般来说，不要在then方法里面定义 Reject 状态的回调函数（即then的第二个参数），总是使用catch方法。建议总是使用catch方法，而不使用then方法的第二个参数。
+    // Promise 内部的错误不会影响到 Promise 外部的代码
+    // 让同步函数同步执行，异步函数异步执行，并且让它们具有统一的 API 呢？回答是可以的，并且还有两种写法。
+      // 第一种写法是用async函数来写。
+     /* const f = () => console.log('now');
+      (async () => f())().then().catch();
+      console.log('next');
+      // 第二种写法是使用new Promise()。*/
+      const ff = () => console.log('now');
+      (() => new Promise(
+          resolve => resolve(ff())
+        ) )();
+      console.log('next');
+      // 鉴于这是一个很常见的需求，所以现在有一个提案，提供Promise.try方法替代上面的写法。
+      // const f = () => console.log('now');
+      // Promise.try(f);
+      // console.log('next');
+    //事实上，Promise.try就是模拟try代码块，就像promise.catch模拟的是catch代码块。
+      Promise.try(() => database.users.get({id: userId})).then().catch();
+  
+  // Iterator遍历器
+      // 对于类似数组的对象（存在数值键名和length属性），部署 Iterator 接口，有一个简便方法，就是Symbol.iterator方法直接引用数组的 Iterator 接口。
+      // NodeList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];或者NodeList.prototype[Symbol.iterator] = [][Symbol.iterator];
+      // 调用 Iterator 接口的场合：解构赋值;扩展运算符;yield*;for...of,Array.from(),Map(), Set(), WeakMap(), WeakSet(),Promise.all(),Promise.race(),字符串的 Iterator 接口,字符串是一个类似数组的对象
+      // for in 读取键名， for of读取键值。
+      // 数组内置的forEach循环，无法中途跳出循环；for in为遍历对象而设计，不适用于遍历数组。for of可以与break、continue和return配合使用
+      // 当用for of遍历对象时需要将对象的简明生成一个数组，然后遍历这个数组：
+      for (var key of Object.keys(obj));
+      //    或者使用Generator函数将对象重新包装一下
+      function* entries(obj) { for (let key of Object.keys(obj)) { yield [key, obj[key]];} }
+      for (let [key, value] of entries(obj)) {console.log(key, '->', value);}
+
+  // Generator异步编程解决方案 
+    // Generator 函数是一个状态机，封装了多个内部状态。function关键字与函数名之间有一个星号；函数体内部使用yield表达式，定义不同的内部状态（yield在英语里的意思就是“产出”）。
+    // yield表达式如果用在另一个表达式之中，必须放在圆括号里面：console.log('Hello' + (yield 123));
+
+
+    /*    
+    与 Iterator 接口的关系
+
+
+next 方法的参数
+yield表达式本身没有返回值，或者说总是返回undefined。next方法可以带一个参数，该参数就会被当作上一个yield表达式的返回值。
+再看一个例子。
+
+function* foo(x) {
+  var y = 2 * (yield (x + 1));
+  var z = yield (y / 3);
+  return (x + y + z);
+}
+
+var a = foo(5);
+a.next() // Object{value:6, done:false}
+a.next() // Object{value:NaN, done:false}
+a.next() // Object{value:NaN, done:true}
+
+var b = foo(5);
+b.next() // { value:6, done:false }
+b.next(12) // { value:8, done:false }
+b.next(13) // { value:42, done:true }
+上面代码中，第二次运行next方法的时候不带参数，导致 y 的值等于2 * undefined（即NaN），除以 3 以后还是NaN，因此返回对象的value属性也等于NaN。第三次运行Next方法的时候不带参数，所以z等于undefined，返回对象的value属性等于5 + NaN + undefined，即NaN。
+
+如果向next方法提供参数，返回结果就完全不一样了。上面代码第一次调用b的next方法时，返回x+1的值6；第二次调用next方法，将上一次yield表达式的值设为12，因此y等于24，返回y / 3的值8；第三次调用next方法，将上一次yield表达式的值设为13，因此z等于13，这时x等于5，y等于24，所以return语句的值等于42。
+
+注意，由于next方法的参数表示上一个yield表达式的返回值，所以在第一次使用next方法时，传递参数是无效的。V8 引擎直接忽略第一次使用next方法时的参数，只有从第二次使用next方法开始，参数才是有效的。从语义上讲，第一个next方法用来启动遍历器对象，所以不用带有参数。
+
+再看一个通过next方法的参数，向 Generator 函数内部输入值的例子。
+
+function* dataConsumer() {
+  console.log('Started');
+  console.log(`1. ${yield}`);
+  console.log(`2. ${yield}`);
+  return 'result';
+}
+
+let genObj = dataConsumer();
+genObj.next();
+// Started
+genObj.next('a')
+// 1. a
+genObj.next('b')
+// 2. b
+上面代码是一个很直观的例子，每次通过next方法向 Generator 函数输入值，然后打印出来。
+
+如果想要第一次调用next方法时，就能够输入值，可以在 Generator 函数外面再包一层。
+
+function wrapper(generatorFunction) {
+  return function (...args) {
+    let generatorObject = generatorFunction(...args);
+    generatorObject.next();
+    return generatorObject;
+  };
+}
+
+const wrapped = wrapper(function* () {
+  console.log(`First input: ${yield}`);
+  return 'DONE';
+});
+
+wrapped().next('hello!')
+// First input: hello!
+上面代码中，Generator 函数如果不用wrapper先包一层，是无法第一次调用next方法，就输入参数的。
+
+
+
+    */ 
     
-    
-
-
-
-
   },
 }
 
