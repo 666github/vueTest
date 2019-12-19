@@ -139,7 +139,7 @@ export default {
       // Promise.try(f);
       // console.log('next');
     //事实上，Promise.try就是模拟try代码块，就像promise.catch模拟的是catch代码块。
-      Promise.try(() => database.users.get({id: userId})).then().catch();
+      // Promise.try(() => database.users.get({id: userId})).then().catch();
   
   // Iterator遍历器
       // 对于类似数组的对象（存在数值键名和length属性），部署 Iterator 接口，有一个简便方法，就是Symbol.iterator方法直接引用数组的 Iterator 接口。
@@ -156,75 +156,75 @@ export default {
   // Generator异步编程解决方案 
     // Generator 函数是一个状态机，封装了多个内部状态。function关键字与函数名之间有一个星号；函数体内部使用yield表达式，定义不同的内部状态（yield在英语里的意思就是“产出”）。
     // yield表达式如果用在另一个表达式之中，必须放在圆括号里面：console.log('Hello' + (yield 123));
+    function* foo(x) {
+      var y = 2 * (yield (x + 1));
+      var z = yield (y / 3);
+      return (x + y + z);
+    }
+
+    var a = foo(5);
+    a.next() ;//x：5 返回x+1是6  由于next方法的参数表示上一个yield表达式的返回值，所以在第一次使用next方法时，传递参数是无效的。
+    a.next(12); //上一表达式是12，y=2*12=24,返回y/3即24/3=8;
+    a.next(13) ;//上一表达式是13，z=13,return返回5+24+13=42
+    // for...of 循环 一旦next方法的返回对象的done属性为true，for...of循环就会中止，且不包含该返回对象
+    function* objectEntries(obj) { //加上遍历器接口
+      let propKeys = Reflect.ownKeys(obj);
+      for (let propKey of propKeys) {
+        yield [propKey, obj[propKey]];
+      }
+    }
+    let jane = { first: 'Jane', last: 'Doe' };
+    for (let [key, value] of objectEntries(jane)) {
+      console.log(`${key}: ${value}`);
+    }
+    // 另一种写法是，将 Generator 函数加到对象的Symbol.iterator属性上面
+    function* objectEntries2() {
+      let propKeys = Object.keys(this);
+      for (let propKey of propKeys) {
+        yield [propKey, this[propKey]];
+      }
+    }
+    let jane2 = { first: 'Jane', last: 'Doe' };
+    jane2[Symbol.iterator] = objectEntries2;
+    for (let [key, value] of jane2) {
+      console.log(`${key}: ${value}`);
+    }
+    // throw方法被捕获以后，会附带执行下一条yield表达式。也就是说，会附带执行一次next方法。
+    // Generator 执行过程中抛出错误，且没有被内部捕获，就不会再执行下去了。如果此后还调用next方法，将返回一个value属性等于undefined、done属性等于true的对象
+    function* g() {
+      yield 1;
+      console.log('throwing an exception');
+      throw new Error('generator broke!');
+      yield 2;
+      yield 3;
+    }
+    function log(generator) {
+      var v;
+      console.log('starting generator');
+      try {
+        v = generator.next();
+        console.log('第一次运行next方法', v);
+      } catch (err) {
+        console.log('捕捉错误', v);
+      }
+      try {
+        v = generator.next();
+        console.log('第二次运行next方法', v);
+      } catch (err) {
+        console.log('捕捉错误', v);
+      }
+      try {
+        v = generator.next();
+        console.log('第三次运行next方法', v);
+      } catch (err) {
+        console.log('捕捉错误', v);
+      }
+      console.log('caller done');
+    }
+    log(g());//然后第三次运行的时候，Generator 函数就已经结束了，不再执行下去了。
 
 
     /*    
-    与 Iterator 接口的关系
-
-
-next 方法的参数
-yield表达式本身没有返回值，或者说总是返回undefined。next方法可以带一个参数，该参数就会被当作上一个yield表达式的返回值。
-再看一个例子。
-
-function* foo(x) {
-  var y = 2 * (yield (x + 1));
-  var z = yield (y / 3);
-  return (x + y + z);
-}
-
-var a = foo(5);
-a.next() // Object{value:6, done:false}
-a.next() // Object{value:NaN, done:false}
-a.next() // Object{value:NaN, done:true}
-
-var b = foo(5);
-b.next() // { value:6, done:false }
-b.next(12) // { value:8, done:false }
-b.next(13) // { value:42, done:true }
-上面代码中，第二次运行next方法的时候不带参数，导致 y 的值等于2 * undefined（即NaN），除以 3 以后还是NaN，因此返回对象的value属性也等于NaN。第三次运行Next方法的时候不带参数，所以z等于undefined，返回对象的value属性等于5 + NaN + undefined，即NaN。
-
-如果向next方法提供参数，返回结果就完全不一样了。上面代码第一次调用b的next方法时，返回x+1的值6；第二次调用next方法，将上一次yield表达式的值设为12，因此y等于24，返回y / 3的值8；第三次调用next方法，将上一次yield表达式的值设为13，因此z等于13，这时x等于5，y等于24，所以return语句的值等于42。
-
-注意，由于next方法的参数表示上一个yield表达式的返回值，所以在第一次使用next方法时，传递参数是无效的。V8 引擎直接忽略第一次使用next方法时的参数，只有从第二次使用next方法开始，参数才是有效的。从语义上讲，第一个next方法用来启动遍历器对象，所以不用带有参数。
-
-再看一个通过next方法的参数，向 Generator 函数内部输入值的例子。
-
-function* dataConsumer() {
-  console.log('Started');
-  console.log(`1. ${yield}`);
-  console.log(`2. ${yield}`);
-  return 'result';
-}
-
-let genObj = dataConsumer();
-genObj.next();
-// Started
-genObj.next('a')
-// 1. a
-genObj.next('b')
-// 2. b
-上面代码是一个很直观的例子，每次通过next方法向 Generator 函数输入值，然后打印出来。
-
-如果想要第一次调用next方法时，就能够输入值，可以在 Generator 函数外面再包一层。
-
-function wrapper(generatorFunction) {
-  return function (...args) {
-    let generatorObject = generatorFunction(...args);
-    generatorObject.next();
-    return generatorObject;
-  };
-}
-
-const wrapped = wrapper(function* () {
-  console.log(`First input: ${yield}`);
-  return 'DONE';
-});
-
-wrapped().next('hello!')
-// First input: hello!
-上面代码中，Generator 函数如果不用wrapper先包一层，是无法第一次调用next方法，就输入参数的。
-
-
 
     */ 
     
