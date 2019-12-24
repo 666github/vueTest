@@ -334,189 +334,364 @@ export default {
         for (let [key, value] of iterEntries(myObj)) {
           console.log(key, value);
         }
+    // async函数
+      // 并发发出远程请求：
+        async function logInOrder(urls) {
+          // 并发读取远程URL
+          const textPromises = urls.map(async url => {
+            const response = await fetch(url);
+            return response.text();
+          });
+          // 按次序输出
+          for (const textPromise of textPromises) {
+            console.log(await textPromise);
+          }
+        }
 
+  // 类
+        // ES5 的构造函数，对应 ES6 的类的构造方法constructor.
+        // 类的所有方法都定义在类的prototype属性上面,在类的实例上面调用方法，其实就是调用原型上的方法。
+        // Object.assign方法向类添加多个方法:Object.assign(Point.prototype, {toString(){},toValue(){} });
+        // prototype对象的constructor属性，直接指向“类”的本身
+        // 与 ES5 一样，类的所有实例共享一个原型对象，使用 Object.getPrototypeOf 方法来获取实例对象的原型。__proto__属性改写原型，必须相当谨慎
+        // 在“类”的内部使用get和set关键字，对某个属性设置存值函数和取值函数，拦截该属性的存取行为；存值函数和取值函数是设置在属性的 Descriptor 对象上的。
+        // class可以写成表达式的形式，类名（name)只能在class内部引用.
+        class Foo {
+          constructor(...args) {
+            this.args = args;
+          }
+          * [Symbol.iterator]() {//Generator 函数
+            for (let arg of this.args) {
+              yield arg;
+            }
+          }
+        }
+        for (let x of new Foo('hello', 'world')) {
+          console.log(x);// hello // world
+        }
+        //this指向 类的方法内部如果含有this，它默认指向类的实例
+          class Objthis {
+            constructor() {//this指向
+              this.getThis = () => this;
+            }
+          }
+          const myObjthis = new Objthis();
+          console.log(myObjthis.getThis() === myObjthis); // true
+        //方法前加上static关键字，就表示该方法不会被实例继承，而是直接通过类来调用.Foo.classMethod() // 'hello'; foo.classMethod() //TypeError
+        //如果静态方法包含this关键字，这个this指的是类，而不是实例。
+        // 静态方法也是可以从super对象上调用的
+        class FooSuper {
+          static classMethod() {
+            return 'hello';
+          }
+        }
+        class BarSuper extends FooSuper {
+          static classMethod() {
+            return super.classMethod() + ', too';
+          }
+        }
+        BarSuper.classMethod(); // "hello, too"
 
-    /*    
+    /*
 
-执行这段代码的方法如下。
+这种新写法的好处是，所有实例对象自身的属性都定义在类的头部，看上去比较整齐，一眼就能看出这个类有哪些实例属性。
+class foo {
+  bar = 'hello';
+  baz = 'world';
+  constructor(){
+    // ...
+  }
+}
+上面的代码，一眼就能看出，foo类有两个实例属性，一目了然。另外，写起来也比较简洁。
 
-var g = gen();
-var result = g.next();
-result.value.then(function(data){
-  return data.json();
-}).then(function(data){
-  g.next(data);
-});
-上面代码中，首先执行 Generator 函数，获取遍历器对象，然后使用next方法（第二行），执行异步任务的第一阶段。由于Fetch模块返回的是一个 Promise 对象，因此要用then方法调用下一个next方法。
+静态属性
+静态属性指的是 Class 本身的属性，即Class.propName，而不是定义在实例对象（this）上的属性。
 
-可以看到，虽然 Generator 函数将异步操作表示得很简洁，但是流程管理却不方便（即何时执行第一阶段、何时执行第二阶段）。
-
-Thunk 函数
-Thunk 函数是自动执行 Generator 函数的一种方法。
-
-参数的求值策略
-Thunk 函数早在上个世纪 60 年代就诞生了。
-
-那时，编程语言刚刚起步，计算机学家还在研究，编译器怎么写比较好。一个争论的焦点是"求值策略"，即函数的参数到底应该何时求值。
-
-var x = 1;
-
-function f(m) {
-  return m * 2;
+class Foo {
 }
 
-f(x + 5)
-上面代码先定义函数f，然后向它传入表达式x + 5。请问，这个表达式应该何时求值？
+Foo.prop = 1;
+Foo.prop // 1
+上面的写法为Foo类定义了一个静态属性prop。
 
-一种意见是"传值调用"（call by value），即在进入函数体之前，就计算x + 5的值（等于 6），再将这个值传入函数f。C 语言就采用这种策略。
+目前，只有这种写法可行，因为 ES6 明确规定，Class 内部只有静态方法，没有静态属性。现在有一个提案提供了类的静态属性，写法是在实例属性的前面，加上static关键字。
 
-f(x + 5)
-// 传值调用时，等同于
-f(6)
-另一种意见是“传名调用”（call by name），即直接将表达式x + 5传入函数体，只在用到它的时候求值。Haskell 语言采用这种策略。
+class MyClass {
+  static myStaticProp = 42;
 
-f(x + 5)
-// 传名调用时，等同于
-(x + 5) * 2
-传值调用和传名调用，哪一种比较好？
-
-回答是各有利弊。传值调用比较简单，但是对参数求值的时候，实际上还没用到这个参数，有可能造成性能损失。
-
-function f(a, b){
-  return b;
+  constructor() {
+    console.log(MyClass.myStaticProp); // 42
+  }
 }
+这个新写法大大方便了静态属性的表达。
 
-f(3 * x * x - 2 * x - 1, x);
-上面代码中，函数f的第一个参数是一个复杂的表达式，但是函数体内根本没用到。对这个参数求值，实际上是不必要的。因此，有一些计算机学家倾向于"传名调用"，即只在执行时求值。
-
-Thunk 函数的含义
-编译器的“传名调用”实现，往往是将参数放到一个临时函数之中，再将这个临时函数传入函数体。这个临时函数就叫做 Thunk 函数。
-
-function f(m) {
-  return m * 2;
-}
-
-f(x + 5);
-
-// 等同于
-
-var thunk = function () {
-  return x + 5;
-};
-
-function f(thunk) {
-  return thunk() * 2;
-}
-上面代码中，函数 f 的参数x + 5被一个函数替换了。凡是用到原参数的地方，对Thunk函数求值即可。
-
-这就是 Thunk 函数的定义，它是“传名调用”的一种实现策略，用来替换某个表达式。
-
-JavaScript 语言的 Thunk 函数
-JavaScript 语言是传值调用，它的 Thunk 函数含义有所不同。在 JavaScript 语言中，Thunk 函数替换的不是表达式，而是多参数函数，将其替换成一个只接受回调函数作为参数的单参数函数。
-
-// 正常版本的readFile（多参数版本）
-fs.readFile(fileName, callback);
-
-// Thunk版本的readFile（单参数版本）
-var Thunk = function (fileName) {
-  return function (callback) {
-    return fs.readFile(fileName, callback);
-  };
-};
-
-var readFileThunk = Thunk(fileName);
-readFileThunk(callback);
-上面代码中，fs模块的readFile方法是一个多参数函数，两个参数分别为文件名和回调函数。经过转换器处理，它变成了一个单参数函数，只接受回调函数作为参数。这个单参数版本，就叫做 Thunk 函数。
-
-任何函数，只要参数有回调函数，就能写成 Thunk 函数的形式。下面是一个简单的 Thunk 函数转换器。
-
-// ES5版本
-var Thunk = function(fn){
-  return function (){
-    var args = Array.prototype.slice.call(arguments);
-    return function (callback){
-      args.push(callback);
-      return fn.apply(this, args);
-    }
-  };
-};
-
-// ES6版本
-const Thunk = function(fn) {
-  return function (...args) {
-    return function (callback) {
-      return fn.call(this, ...args, callback);
-    }
-  };
-};
-使用上面的转换器，生成fs.readFile的 Thunk 函数。
-
-var readFileThunk = Thunk(fs.readFile);
-readFileThunk(fileA)(callback);
-下面是另一个完整的例子。
-
-function f(a, cb) {
-  cb(a);
-}
-const ft = Thunk(f);
-
-ft(1)(console.log) // 1
-Thunkify 模块
-生产环境的转换器，建议使用 Thunkify 模块。
-
-首先是安装。
-
-$ npm install thunkify
-使用方式如下。
-
-var thunkify = require('thunkify');
-var fs = require('fs');
-
-var read = thunkify(fs.readFile);
-read('package.json')(function(err, str){
+// 老写法
+class Foo {
   // ...
-});
-Thunkify 的源码与上一节那个简单的转换器非常像。
+}
+Foo.prop = 1;
 
-function thunkify(fn) {
-  return function() {
-    var args = new Array(arguments.length);
-    var ctx = this;
+// 新写法
+class Foo {
+  static prop = 1;
+}
+上面代码中，老写法的静态属性定义在类的外部。整个类生成以后，再生成静态属性。这样让人很容易忽略这个静态属性，也不符合相关代码应该放在一起的代码组织原则。另外，新写法是显式声明（declarative），而不是赋值处理，语义更好。
 
-    for (var i = 0; i < args.length; ++i) {
-      args[i] = arguments[i];
-    }
+私有方法和私有属性
+现有的解决方案
+私有方法和私有属性，是只能在类的内部访问的方法和属性，外部不能访问。这是常见需求，有利于代码的封装，但 ES6 不提供，只能通过变通方法模拟实现。
 
-    return function (done) {
-      var called;
+一种做法是在命名上加以区别。
 
-      args.push(function () {
-        if (called) return;
-        called = true;
-        done.apply(null, arguments);
-      });
+class Widget {
 
-      try {
-        fn.apply(ctx, args);
-      } catch (err) {
-        done(err);
-      }
+  // 公有方法
+  foo (baz) {
+    this._bar(baz);
+  }
+
+  // 私有方法
+  _bar(baz) {
+    return this.snaf = baz;
+  }
+
+  // ...
+}
+上面代码中，_bar方法前面的下划线，表示这是一个只限于内部使用的私有方法。但是，这种命名是不保险的，在类的外部，还是可以调用到这个方法。
+
+另一种方法就是索性将私有方法移出模块，因为模块内部的所有方法都是对外可见的。
+
+class Widget {
+  foo (baz) {
+    bar.call(this, baz);
+  }
+
+  // ...
+}
+
+function bar(baz) {
+  return this.snaf = baz;
+}
+上面代码中，foo是公开方法，内部调用了bar.call(this, baz)。这使得bar实际上成为了当前模块的私有方法。
+
+还有一种方法是利用Symbol值的唯一性，将私有方法的名字命名为一个Symbol值。
+
+const bar = Symbol('bar');
+const snaf = Symbol('snaf');
+
+export default class myClass{
+
+  // 公有方法
+  foo(baz) {
+    this[bar](baz);
+  }
+
+  // 私有方法
+  [bar](baz) {
+    return this[snaf] = baz;
+  }
+
+  // ...
+};
+上面代码中，bar和snaf都是Symbol值，一般情况下无法获取到它们，因此达到了私有方法和私有属性的效果。但是也不是绝对不行，Reflect.ownKeys()依然可以拿到它们。
+
+const inst = new myClass();
+
+Reflect.ownKeys(myClass.prototype)
+// [ 'constructor', 'foo', Symbol(bar) ]
+上面代码中，Symbol 值的属性名依然可以从类的外部拿到。
+
+私有属性的提案
+目前，有一个提案，为class加了私有属性。方法是在属性名之前，使用#表示。
+
+class IncreasingCounter {
+  #count = 0;
+  get value() {
+    console.log('Getting the current value!');
+    return this.#count;
+  }
+  increment() {
+    this.#count++;
+  }
+}
+上面代码中，#count就是私有属性，只能在类的内部使用（this.#count）。如果在类的外部使用，就会报错。
+
+const counter = new IncreasingCounter();
+counter.#count // 报错
+counter.#count = 42 // 报错
+上面代码在类的外部，读取私有属性，就会报错。
+
+下面是另一个例子。
+
+class Point {
+  #x;
+
+  constructor(x = 0) {
+    this.#x = +x;
+  }
+
+  get x() {
+    return this.#x;
+  }
+
+  set x(value) {
+    this.#x = +value;
+  }
+}
+上面代码中，#x就是私有属性，在Point类之外是读取不到这个属性的。由于井号#是属性名的一部分，使用时必须带有#一起使用，所以#x和x是两个不同的属性。
+
+之所以要引入一个新的前缀#表示私有属性，而没有采用private关键字，是因为 JavaScript 是一门动态语言，没有类型声明，使用独立的符号似乎是唯一的比较方便可靠的方法，能够准确地区分一种属性是否为私有属性。另外，Ruby 语言使用@表示私有属性，ES6 没有用这个符号而使用#，是因为@已经被留给了 Decorator。
+
+这种写法不仅可以写私有属性，还可以用来写私有方法。
+
+class Foo {
+  #a;
+  #b;
+  constructor(a, b) {
+    this.#a = a;
+    this.#b = b;
+  }
+  #sum() {
+    return #a + #b;
+  }
+  printSum() {
+    console.log(this.#sum());
+  }
+}
+上面代码中，#sum()就是一个私有方法。
+
+另外，私有属性也可以设置 getter 和 setter 方法。
+
+class Counter {
+  #xValue = 0;
+
+  constructor() {
+    super();
+    // ...
+  }
+
+  get #x() { return #xValue; }
+  set #x(value) {
+    this.#xValue = value;
+  }
+}
+上面代码中，#x是一个私有属性，它的读写都通过get #x()和set #x()来完成。
+
+私有属性不限于从this引用，只要是在类的内部，实例也可以引用私有属性。
+
+class Foo {
+  #privateValue = 42;
+  static getPrivateValue(foo) {
+    return foo.#privateValue;
+  }
+}
+
+Foo.getPrivateValue(new Foo()); // 42
+上面代码允许从实例foo上面引用私有属性。
+
+私有属性和私有方法前面，也可以加上static关键字，表示这是一个静态的私有属性或私有方法。
+
+class FakeMath {
+  static PI = 22 / 7;
+  static #totallyRandomNumber = 4;
+
+  static #computeRandomNumber() {
+    return FakeMath.#totallyRandomNumber;
+  }
+
+  static random() {
+    console.log('I heard you like random numbers…')
+    return FakeMath.#computeRandomNumber();
+  }
+}
+
+FakeMath.PI // 3.142857142857143
+FakeMath.random()
+// I heard you like random numbers…
+// 4
+FakeMath.#totallyRandomNumber // 报错
+FakeMath.#computeRandomNumber() // 报错
+上面代码中，#totallyRandomNumber是私有属性，#computeRandomNumber()是私有方法，只能在FakeMath这个类的内部调用，外部调用就会报错。
+
+new.target 属性
+new是从构造函数生成实例对象的命令。ES6 为new命令引入了一个new.target属性，该属性一般用在构造函数之中，返回new命令作用于的那个构造函数。如果构造函数不是通过new命令或Reflect.construct()调用的，new.target会返回undefined，因此这个属性可以用来确定构造函数是怎么调用的。
+
+function Person(name) {
+  if (new.target !== undefined) {
+    this.name = name;
+  } else {
+    throw new Error('必须使用 new 命令生成实例');
+  }
+}
+
+// 另一种写法
+function Person(name) {
+  if (new.target === Person) {
+    this.name = name;
+  } else {
+    throw new Error('必须使用 new 命令生成实例');
+  }
+}
+
+var person = new Person('张三'); // 正确
+var notAPerson = Person.call(person, '张三');  // 报错
+上面代码确保构造函数只能通过new命令调用。
+
+Class 内部调用new.target，返回当前 Class。
+
+class Rectangle {
+  constructor(length, width) {
+    console.log(new.target === Rectangle);
+    this.length = length;
+    this.width = width;
+  }
+}
+
+var obj = new Rectangle(3, 4); // 输出 true
+需要注意的是，子类继承父类时，new.target会返回子类。
+
+class Rectangle {
+  constructor(length, width) {
+    console.log(new.target === Rectangle);
+    // ...
+  }
+}
+
+class Square extends Rectangle {
+  constructor(length) {
+    super(length, width);
+  }
+}
+
+var obj = new Square(3); // 输出 false
+上面代码中，new.target会返回子类。
+
+利用这个特点，可以写出不能独立使用、必须继承后才能使用的类。
+
+class Shape {
+  constructor() {
+    if (new.target === Shape) {
+      throw new Error('本类不能实例化');
     }
   }
-};
-它的源码主要多了一个检查机制，变量called确保回调函数只运行一次。这样的设计与下文的 Generator 函数相关。请看下面的例子。
-
-function f(a, b, callback){
-  var sum = a + b;
-  callback(sum);
-  callback(sum);
 }
 
-var ft = thunkify(f);
-var print = console.log.bind(console);
-ft(1, 2)(print);
-// 3
-上面代码中，由于thunkify只允许回调函数执行一次，所以只输出一行结果。
+class Rectangle extends Shape {
+  constructor(length, width) {
+    super();
+    // ...
+  }
+}
+
+var x = new Shape();  // 报错
+var y = new Rectangle(3, 4);  // 正确
+上面代码中，Shape类不能被实例化，只能用于继承。
+
+注意，在函数外部，使用new.target会报错。
+
+
+
+
 
     */ 
     
