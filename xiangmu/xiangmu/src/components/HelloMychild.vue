@@ -391,306 +391,160 @@ export default {
           }
         }
         BarSuper.classMethod(); // "hello, too"
+    
+    // 类的应用
+        // 子类的__proto__属性，表示构造函数的继承，总是指向父类。作为一个对象，B.__proto__ = A;
+        // 子类prototype属性的__proto__属性，表示方法的继承，总是指向父类的prototype属性。作为一个构造函数,B.prototype.__proto__ = A.prototype;
+        // 通过子类实例的__proto__.__proto__属性，可以修改父类实例的行为
+
+    // Module的语法
+        // export使用大括号指定所要输出的一组变量 export { firstName, lastName, year };可以使用as关键字重命名。
+
 
     /*
 
-这种新写法的好处是，所有实例对象自身的属性都定义在类的头部，看上去比较整齐，一眼就能看出这个类有哪些实例属性。
-class foo {
-  bar = 'hello';
-  baz = 'world';
-  constructor(){
-    // ...
-  }
-}
-上面的代码，一眼就能看出，foo类有两个实例属性，一目了然。另外，写起来也比较简洁。
 
-静态属性
-静态属性指的是 Class 本身的属性，即Class.propName，而不是定义在实例对象（this）上的属性。
 
-class Foo {
-}
 
-Foo.prop = 1;
-Foo.prop // 1
-上面的写法为Foo类定义了一个静态属性prop。
+通常情况下，
+function v1() { ... }
+function v2() { ... }
 
-目前，只有这种写法可行，因为 ES6 明确规定，Class 内部只有静态方法，没有静态属性。现在有一个提案提供了类的静态属性，写法是在实例属性的前面，加上static关键字。
-
-class MyClass {
-  static myStaticProp = 42;
-
-  constructor() {
-    console.log(MyClass.myStaticProp); // 42
-  }
-}
-这个新写法大大方便了静态属性的表达。
-
-// 老写法
-class Foo {
-  // ...
-}
-Foo.prop = 1;
-
-// 新写法
-class Foo {
-  static prop = 1;
-}
-上面代码中，老写法的静态属性定义在类的外部。整个类生成以后，再生成静态属性。这样让人很容易忽略这个静态属性，也不符合相关代码应该放在一起的代码组织原则。另外，新写法是显式声明（declarative），而不是赋值处理，语义更好。
-
-私有方法和私有属性
-现有的解决方案
-私有方法和私有属性，是只能在类的内部访问的方法和属性，外部不能访问。这是常见需求，有利于代码的封装，但 ES6 不提供，只能通过变通方法模拟实现。
-
-一种做法是在命名上加以区别。
-
-class Widget {
-
-  // 公有方法
-  foo (baz) {
-    this._bar(baz);
-  }
-
-  // 私有方法
-  _bar(baz) {
-    return this.snaf = baz;
-  }
-
-  // ...
-}
-上面代码中，_bar方法前面的下划线，表示这是一个只限于内部使用的私有方法。但是，这种命名是不保险的，在类的外部，还是可以调用到这个方法。
-
-另一种方法就是索性将私有方法移出模块，因为模块内部的所有方法都是对外可见的。
-
-class Widget {
-  foo (baz) {
-    bar.call(this, baz);
-  }
-
-  // ...
-}
-
-function bar(baz) {
-  return this.snaf = baz;
-}
-上面代码中，foo是公开方法，内部调用了bar.call(this, baz)。这使得bar实际上成为了当前模块的私有方法。
-
-还有一种方法是利用Symbol值的唯一性，将私有方法的名字命名为一个Symbol值。
-
-const bar = Symbol('bar');
-const snaf = Symbol('snaf');
-
-export default class myClass{
-
-  // 公有方法
-  foo(baz) {
-    this[bar](baz);
-  }
-
-  // 私有方法
-  [bar](baz) {
-    return this[snaf] = baz;
-  }
-
-  // ...
+export {
+  v1 as streamV1,
+  v2 as streamV2,
+  v2 as streamLatestVersion
 };
-上面代码中，bar和snaf都是Symbol值，一般情况下无法获取到它们，因此达到了私有方法和私有属性的效果。但是也不是绝对不行，Reflect.ownKeys()依然可以拿到它们。
+上面代码使用as关键字，重命名了函数v1和v2的对外接口。重命名后，v2可以用不同的名字输出两次。
 
-const inst = new myClass();
+需要特别注意的是，export命令规定的是对外的接口，必须与模块内部的变量建立一一对应关系。
 
-Reflect.ownKeys(myClass.prototype)
-// [ 'constructor', 'foo', Symbol(bar) ]
-上面代码中，Symbol 值的属性名依然可以从类的外部拿到。
+// 报错
+export 1;
 
-私有属性的提案
-目前，有一个提案，为class加了私有属性。方法是在属性名之前，使用#表示。
+// 报错
+var m = 1;
+export m;
+上面两种写法都会报错，因为没有提供对外的接口。第一种写法直接输出 1，第二种写法通过变量m，还是直接输出 1。1只是一个值，不是接口。正确的写法是下面这样。
 
-class IncreasingCounter {
-  #count = 0;
-  get value() {
-    console.log('Getting the current value!');
-    return this.#count;
-  }
-  increment() {
-    this.#count++;
-  }
+// 写法一
+export var m = 1;
+
+// 写法二
+var m = 1;
+export {m};
+
+// 写法三
+var n = 1;
+export {n as m};
+上面三种写法都是正确的，规定了对外的接口m。其他脚本可以通过这个接口，取到值1。它们的实质是，在接口名与模块内部变量之间，建立了一一对应的关系。
+
+同样的，function和class的输出，也必须遵守这样的写法。
+
+// 报错
+function f() {}
+export f;
+
+// 正确
+export function f() {};
+
+// 正确
+function f() {}
+export {f};
+另外，export语句输出的接口，与其对应的值是动态绑定关系，即通过该接口，可以取到模块内部实时的值。
+
+export var foo = 'bar';
+setTimeout(() => foo = 'baz', 500);
+上面代码输出变量foo，值为bar，500 毫秒之后变成baz。
+
+这一点与 CommonJS 规范完全不同。CommonJS 模块输出的是值的缓存，不存在动态更新，详见下文《Module 的加载实现》一节。
+
+最后，export命令可以出现在模块的任何位置，只要处于模块顶层就可以。如果处于块级作用域内，就会报错，下一节的import命令也是如此。这是因为处于条件代码块之中，就没法做静态优化了，违背了 ES6 模块的设计初衷。
+
+function foo() {
+  export default 'bar' // SyntaxError
 }
-上面代码中，#count就是私有属性，只能在类的内部使用（this.#count）。如果在类的外部使用，就会报错。
+foo()
+上面代码中，export语句放在函数之中，结果报错。
 
-const counter = new IncreasingCounter();
-counter.#count // 报错
-counter.#count = 42 // 报错
-上面代码在类的外部，读取私有属性，就会报错。
+import 命令
+使用export命令定义了模块的对外接口以后，其他 JS 文件就可以通过import命令加载这个模块。
 
-下面是另一个例子。
+// main.js
+import { firstName, lastName, year } from './profile.js';
 
-class Point {
-  #x;
-
-  constructor(x = 0) {
-    this.#x = +x;
-  }
-
-  get x() {
-    return this.#x;
-  }
-
-  set x(value) {
-    this.#x = +value;
-  }
+function setName(element) {
+  element.textContent = firstName + ' ' + lastName;
 }
-上面代码中，#x就是私有属性，在Point类之外是读取不到这个属性的。由于井号#是属性名的一部分，使用时必须带有#一起使用，所以#x和x是两个不同的属性。
+上面代码的import命令，用于加载profile.js文件，并从中输入变量。import命令接受一对大括号，里面指定要从其他模块导入的变量名。大括号里面的变量名，必须与被导入模块（profile.js）对外接口的名称相同。
 
-之所以要引入一个新的前缀#表示私有属性，而没有采用private关键字，是因为 JavaScript 是一门动态语言，没有类型声明，使用独立的符号似乎是唯一的比较方便可靠的方法，能够准确地区分一种属性是否为私有属性。另外，Ruby 语言使用@表示私有属性，ES6 没有用这个符号而使用#，是因为@已经被留给了 Decorator。
+如果想为输入的变量重新取一个名字，import命令要使用as关键字，将输入的变量重命名。
 
-这种写法不仅可以写私有属性，还可以用来写私有方法。
+import { lastName as surname } from './profile.js';
+import命令输入的变量都是只读的，因为它的本质是输入接口。也就是说，不允许在加载模块的脚本里面，改写接口。
 
-class Foo {
-  #a;
-  #b;
-  constructor(a, b) {
-    this.#a = a;
-    this.#b = b;
-  }
-  #sum() {
-    return #a + #b;
-  }
-  printSum() {
-    console.log(this.#sum());
-  }
+import {a} from './xxx.js'
+
+a = {}; // Syntax Error : 'a' is read-only;
+上面代码中，脚本加载了变量a，对其重新赋值就会报错，因为a是一个只读的接口。但是，如果a是一个对象，改写a的属性是允许的。
+
+import {a} from './xxx.js'
+
+a.foo = 'hello'; // 合法操作
+上面代码中，a的属性可以成功改写，并且其他模块也可以读到改写后的值。不过，这种写法很难查错，建议凡是输入的变量，都当作完全只读，不要轻易改变它的属性。
+
+import后面的from指定模块文件的位置，可以是相对路径，也可以是绝对路径，.js后缀可以省略。如果只是模块名，不带有路径，那么必须有配置文件，告诉 JavaScript 引擎该模块的位置。
+
+import {myMethod} from 'util';
+上面代码中，util是模块文件名，由于不带有路径，必须通过配置，告诉引擎怎么取到这个模块。
+
+注意，import命令具有提升效果，会提升到整个模块的头部，首先执行。
+
+foo();
+
+import { foo } from 'my_module';
+上面的代码不会报错，因为import的执行早于foo的调用。这种行为的本质是，import命令是编译阶段执行的，在代码运行之前。
+
+由于import是静态执行，所以不能使用表达式和变量，这些只有在运行时才能得到结果的语法结构。
+
+// 报错
+import { 'f' + 'oo' } from 'my_module';
+
+// 报错
+let module = 'my_module';
+import { foo } from module;
+
+// 报错
+if (x === 1) {
+  import { foo } from 'module1';
+} else {
+  import { foo } from 'module2';
 }
-上面代码中，#sum()就是一个私有方法。
+上面三种写法都会报错，因为它们用到了表达式、变量和if结构。在静态分析阶段，这些语法都是没法得到值的。
 
-另外，私有属性也可以设置 getter 和 setter 方法。
+最后，import语句会执行所加载的模块，因此可以有下面的写法。
 
-class Counter {
-  #xValue = 0;
+import 'lodash';
+上面代码仅仅执行lodash模块，但是不输入任何值。
 
-  constructor() {
-    super();
-    // ...
-  }
+如果多次重复执行同一句import语句，那么只会执行一次，而不会执行多次。
 
-  get #x() { return #xValue; }
-  set #x(value) {
-    this.#xValue = value;
-  }
-}
-上面代码中，#x是一个私有属性，它的读写都通过get #x()和set #x()来完成。
+import 'lodash';
+import 'lodash';
+上面代码加载了两次lodash，但是只会执行一次。
 
-私有属性不限于从this引用，只要是在类的内部，实例也可以引用私有属性。
+import { foo } from 'my_module';
+import { bar } from 'my_module';
 
-class Foo {
-  #privateValue = 42;
-  static getPrivateValue(foo) {
-    return foo.#privateValue;
-  }
-}
+// 等同于
+import { foo, bar } from 'my_module';
+上面代码中，虽然foo和bar在两个语句中加载，但是它们对应的是同一个my_module实例。也就是说，import语句是 Singleton 模式。
 
-Foo.getPrivateValue(new Foo()); // 42
-上面代码允许从实例foo上面引用私有属性。
+目前阶段，通过 Babel 转码，CommonJS 模块的require命令和 ES6 模块的import命令，可以写在同一个模块里面，但是最好不要这样做。因为import在静态解析阶段执行，所以它是一个模块之中最早执行的。下面的代码可能不会得到预期结果。
 
-私有属性和私有方法前面，也可以加上static关键字，表示这是一个静态的私有属性或私有方法。
-
-class FakeMath {
-  static PI = 22 / 7;
-  static #totallyRandomNumber = 4;
-
-  static #computeRandomNumber() {
-    return FakeMath.#totallyRandomNumber;
-  }
-
-  static random() {
-    console.log('I heard you like random numbers…')
-    return FakeMath.#computeRandomNumber();
-  }
-}
-
-FakeMath.PI // 3.142857142857143
-FakeMath.random()
-// I heard you like random numbers…
-// 4
-FakeMath.#totallyRandomNumber // 报错
-FakeMath.#computeRandomNumber() // 报错
-上面代码中，#totallyRandomNumber是私有属性，#computeRandomNumber()是私有方法，只能在FakeMath这个类的内部调用，外部调用就会报错。
-
-new.target 属性
-new是从构造函数生成实例对象的命令。ES6 为new命令引入了一个new.target属性，该属性一般用在构造函数之中，返回new命令作用于的那个构造函数。如果构造函数不是通过new命令或Reflect.construct()调用的，new.target会返回undefined，因此这个属性可以用来确定构造函数是怎么调用的。
-
-function Person(name) {
-  if (new.target !== undefined) {
-    this.name = name;
-  } else {
-    throw new Error('必须使用 new 命令生成实例');
-  }
-}
-
-// 另一种写法
-function Person(name) {
-  if (new.target === Person) {
-    this.name = name;
-  } else {
-    throw new Error('必须使用 new 命令生成实例');
-  }
-}
-
-var person = new Person('张三'); // 正确
-var notAPerson = Person.call(person, '张三');  // 报错
-上面代码确保构造函数只能通过new命令调用。
-
-Class 内部调用new.target，返回当前 Class。
-
-class Rectangle {
-  constructor(length, width) {
-    console.log(new.target === Rectangle);
-    this.length = length;
-    this.width = width;
-  }
-}
-
-var obj = new Rectangle(3, 4); // 输出 true
-需要注意的是，子类继承父类时，new.target会返回子类。
-
-class Rectangle {
-  constructor(length, width) {
-    console.log(new.target === Rectangle);
-    // ...
-  }
-}
-
-class Square extends Rectangle {
-  constructor(length) {
-    super(length, width);
-  }
-}
-
-var obj = new Square(3); // 输出 false
-上面代码中，new.target会返回子类。
-
-利用这个特点，可以写出不能独立使用、必须继承后才能使用的类。
-
-class Shape {
-  constructor() {
-    if (new.target === Shape) {
-      throw new Error('本类不能实例化');
-    }
-  }
-}
-
-class Rectangle extends Shape {
-  constructor(length, width) {
-    super();
-    // ...
-  }
-}
-
-var x = new Shape();  // 报错
-var y = new Rectangle(3, 4);  // 正确
-上面代码中，Shape类不能被实例化，只能用于继承。
-
-注意，在函数外部，使用new.target会报错。
-
-
-
+require('core-js/modules/es6.symbol');
+require('core-js/modules/es6.promise');
+import React from 'React';
 
 
     */ 
