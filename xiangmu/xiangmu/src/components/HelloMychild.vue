@@ -391,7 +391,14 @@ export default {
           }
         }
         BarSuper.classMethod(); // "hello, too"
-    
+    // 子类继承父类时，new.target会返回子类
+      //类的继承
+      // 在子类的构造函数中，只有调用super之后，才可以使用this关键字
+      // super虽然代表了父类A的构造函数，但是返回的是子类B的实例，即super内部的this指的是B的实例，
+      // 因此super()在这里相当于A.prototype.constructor.call(this)。
+      // super作为对象时，在普通方法中，指向父类的原型对象；在静态方法中，指向父类，
+      // 由于super指向父类的原型对象，所以定义在父类实例上的方法或属性，是无法通过super调用的，
+      // 如果属性定义在父类的原型对象上，super就可以取到。
     // 类的应用
         // 子类的__proto__属性，表示构造函数的继承，总是指向父类。作为一个对象，B.__proto__ = A;
         // 子类prototype属性的__proto__属性，表示方法的继承，总是指向父类的prototype属性。作为一个构造函数,B.prototype.__proto__ = A.prototype;
@@ -399,6 +406,25 @@ export default {
 
     // Module的语法
         // export使用大括号指定所要输出的一组变量 export { firstName, lastName, year };可以使用as关键字重命名。
+        // 第一组是使用export default时，对应的import语句不需要使用大括号；第二组是不使用export default时，对应的import语句需要使用大括号
+          // 第一组
+            // export default function crc32() { // 输出
+            //   // ...
+            // }
+            // import crc32 from 'crc32'; // 输入
+
+            // // 第二组
+            // export function crc32() { // 输出
+            //   // ...
+            // };
+            // import {crc32} from 'crc32'; // 输入
+        // export { each as forEach };暴露出forEach接口，默认指向each接口
+    
+    // Module的加载实现
+        // 两种脚本异步加载的方式：defer先渲染后执行；async下载完就执行
+              // <script src="path/to/myModule.js" defer></script> defer要等到整个页面在内存中正常渲染结束（DOM 结构完全生成，以及其他脚本执行完成），才会执行
+              // <script src="path/to/myModule.js" async></script> async一旦下载完，渲染引擎就会中断渲染，执行这个脚本以后，再继续渲染。
+        // 浏览器加载 ES6 模块 type="module"属性，是异步加载，等同于打开了<script>标签的defer
 
 
     /*
