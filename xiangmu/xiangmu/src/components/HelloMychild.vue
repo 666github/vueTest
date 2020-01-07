@@ -422,9 +422,9 @@ export default {
     
     // Module的加载实现
         // 两种脚本异步加载的方式：defer先渲染后执行；async下载完就执行
-              // <script src="path/to/myModule.js" defer></script> defer要等到整个页面在内存中正常渲染结束（DOM 结构完全生成，以及其他脚本执行完成），才会执行
-              // <script src="path/to/myModule.js" async></script> async一旦下载完，渲染引擎就会中断渲染，执行这个脚本以后，再继续渲染。
-        // 浏览器加载 ES6 模块 type="module"属性，是异步加载，等同于打开了<script>标签的defer
+//            <script src="path/to/myModule.js" defer>	defer要等到整个页面在内存中正常渲染结束（DOM 结构完全生成，以及其他脚本执行完成），才会执行
+//            <script src="path/to/myModule.js" async> async一旦下载完，渲染引擎就会中断渲染，执行这个脚本以后，再继续渲染。
+//           浏览器加载 ES6 模块 type="module"属性，是异步加载，等同于打开了script标签的defer
 
 
     /*
