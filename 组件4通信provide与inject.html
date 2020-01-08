@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>中央事件</title>
+    <title>provideInject</title>
 </head>
-<script src=".././node_modules/vue/dist/vue.min.js"></script>
+<script src="../node_modules/vue/dist/vue.min.js"></script>
 <body>
         <div id="app"> </div>
     <script>
@@ -15,35 +15,45 @@
            不论子组件有多深，只要调用了inject那么就可以注入provider中的数据，而不是局限于只能在当前父组件的prop属性来获取数据，
            只要在父组件的生命周期内，子组件都可以调用。
         */ 
-        Vue.component('Child', {
+        Vue.component('Childtwo', {
             data(){
                 return {
                     msg:''
                 }
             },
             template:`
-                <div></div>
+                <div>fooNew：{{fooNew}}</div>
             `,
             methods:{
                passData(val){
                 //触发全局事件globalEvent
                 bus.$emit('globalEvent',val);
                }
-            }
+            }, 
+            inject: ["fooNew"]
         })
-        
-        var App={//声子
-            data() {
+        Vue.component('Childone', {
+            data(){
                 return {
-                    msg:"我"                 
+                    msg:''
                 }
-            },          
+            },
             template:`
                 <div>
-                    <brother1></brother1>
-                    <brother2></brother2>
+                	<Childtwo></Childtwo>
                 </div>
             `
+        })
+        
+        var App={//声子         
+            template:`
+                <div>
+					<Childone></Childone>
+                </div>
+            `,
+            provide: {
+			    fooNew: "爷爷provide给孙子，孙子inject接收"
+			 },
         }
         new Vue({
             el:'#app',
