@@ -1,8 +1,7 @@
 <template>
     <div>
         <el-container style=" border: 1px solid #eee">        
-            <el-container>
-              <el-header style="text-align: right; font-size: 12px">                    
+              <el-header style="text-align: right; font-size: 12px">   
                 <!-- 下拉 -->
                 <el-dropdown>
                   <i class="el-icon-setting" style="margin-right: 15px"></i>
@@ -13,35 +12,35 @@
                   </el-dropdown-menu>
                 </el-dropdown>                  
                 <span>已登录</span>
-              </el-header>                
-              <el-main>
-              	<div>
-              		<el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-		              	<div style="border: solid 1px red;border-radius: 5px 5px 0 0;">
-		              		<p style="text-align: center;height: 25px;margin: 5px 0;">菜单</p>
-		              		<el-tree
-						      :data="datalist"
-						      show-checkbox
-						      node-key="id"
-						      ref="tree"
-						      highlight-current
-						      :default-checked-keys="[1,4]"
-						      :props="defaultProps">
-						  	</el-tree>
-						  	<el-tree
-						      :data="datalist2"
-							  node-key="id" 
-							  show-checkbox
-							  ref="tree"
-							  @check-change="handleCheckChange"
-						      :default-checked-keys="[72]"
-						      :props="defaultProps">
-						  	</el-tree>
-		              	</div> 
-		            </el-aside>
-		            <el-header style="text-align: right; font-size: 12px;width:800px;">                    
-                		<div>
-                			<el-select v-model="value" placeholder="请选择">
+              </el-header>
+			  <el-container>
+			    <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+	              	<div style="border: solid 1px red;border-radius: 5px 5px 0 0;">
+	              		<p style="text-align: center;height: 25px;margin: 5px 0;">菜单</p>
+	              		<el-tree
+					      :data="datalist"
+					      show-checkbox
+					      node-key="id"
+					      ref="tree"
+					      highlight-current
+					      :default-checked-keys="[1,4]"
+					      :props="defaultProps">
+					  	</el-tree>
+					  	<el-tree
+					      :data="datalist2"
+						  node-key="id" 
+						  show-checkbox
+						  ref="tree"
+						  @check-change="handleCheckChange"
+					      :default-checked-keys="[72]"
+					      :props="defaultProps">
+					  	</el-tree>
+	              	</div> 
+	            </el-aside>
+			    	<el-main style="padding-top: 0;">             		
+		            <el-header style="text-align: right; font-size: 12px;background-color:#FFFFFF;padding: 0;">                    
+                		<div style="float: left;">
+                			<el-select v-model="value" placeholder="图层选择" style="width: 100px;">
 							    <el-option
 							      v-for="item in options"
 							      :key="item.value"
@@ -49,7 +48,7 @@
 							      :value="item.value">
 							    </el-option>
 						    </el-select>
-						    <el-select v-model="message" placeholder="请选择2">
+						    <el-select v-model="valueJie" placeholder="街乡镇" style="width: 100px;">
 							    <el-option
 							      v-for="item in options"
 							      :key="item.value"
@@ -57,7 +56,7 @@
 							      :value="item.value">
 							    </el-option>
 						    </el-select>
-						    <el-select v-model="forChildMsg" placeholder="请选择3">
+						    <el-select v-model="valueCun" placeholder="村社区" style="width: 100px;">
 							    <el-option
 							      v-for="item in options"
 							      :key="item.value"
@@ -66,86 +65,28 @@
 							    </el-option>
 						    </el-select>
                 		</div>
-              		</el-header>
-		            
-              	</div>
-                  <div>                
-                    <!-- 复合框 -->
-                    <el-input placeholder="请输入内容" v-model="fuheinput" class="input-with-select">
-                      <el-select v-model="select" slot="prepend" placeholder="请选择">
-                        <el-option label="餐厅名" value="1"></el-option>
-                        <el-option label="订单号" value="2"></el-option>
-                        <el-option label="用户电话" value="3"></el-option>
-                      </el-select>
-                      <el-button slot="append" icon="el-icon-search"></el-button>
-                    </el-input>
-                    <!-- 输入建议 输入提示 -->
-                    <el-row class="demo-autocomplete">
-                      <!-- fetch-suggestions 是一个返回输入建议的方法属性 cb(data) 返回到 autocomplete 组件中 -->                         
-                      <el-col :span="12">
-                        <el-autocomplete
-                          class="inline-input"
-                          v-model="state1"
-                          :fetch-suggestions="querySearch"
-                          placeholder="激活即列出输入建议"
-                          @select="handleSelect"                             
-                        ></el-autocomplete>
-                      </el-col>  
-                      <!--trigger-on-focus 是否在输入框 focus 时显示建议列表 -->
-                      <el-col :span="12">
-                        <el-autocomplete
-                          class="inline-input"
-                          v-model="state2"
-                          :fetch-suggestions="querySearch"
-                          placeholder="输入后匹配输入建议"
-                          :trigger-on-focus="false"
-                          @select="handleSelect"                             
-                        >
-                        <template slot-scope="{ item }">
-                            <div class="name">{{ item.value }}</div>
-                            <span class="addr">{{ item.address }}</span>
-                          </template>
-                      </el-autocomplete>
-                      </el-col>
-                    </el-row>
-                    </div>
-                
+                		<div style="float: left;margin-left: 50px;">
+                			<el-select v-model="value1" placeholder="图层选择" style="width: 150px;">
+							    <el-option
+							      v-for="item in options"
+							      :key="item.value"
+							      :label="item.label"
+							      :value="item.value">
+							    </el-option>
+						    </el-select>
+						    <el-input v-model="input" placeholder="请输入id" prefix-icon="el-icon-search" style="width: 100px;"></el-input>
+                		</div>
+                		<TongzhouEdit style="float: right;"/>
+               		</el-header>		                                             
               </el-main>
-            </el-container>
-          </el-container>              
-
-        <!-- 标签页 卡片化 -->
-        <el-tabs type="border-card" @tab-click="tabClick">
-          <el-tab-pane label="用户管理">用户管理的内容</el-tab-pane>
-          <el-tab-pane label="配置管理">配置管理的内容</el-tab-pane>
-          <el-tab-pane label="角色管理">角色管理的内容</el-tab-pane>
-          <el-tab-pane label="定时任务补偿">定时任务补偿的内容</el-tab-pane>
-        </el-tabs>
-        <!-- 面包屑 -->
-        <el-breadcrumb separator="/">
-          <el-breadcrumb-item :to="{ path: '/' }">首页：to路由跳转对象 同vue-router的to</el-breadcrumb-item>
-          <el-breadcrumb-item><a href="/">活动管理</a></el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/Hellomy' }">活动列表</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/' }">活动详情</el-breadcrumb-item>
-        </el-breadcrumb>
-        <!-- 下拉菜单 -->
-        <el-dropdown @command="handleCommand">
-          <span class="el-dropdown-link">
-            下拉菜单<i class="el-icon-arrow-down el-icon--right"></i>
-          </span>
-          <el-dropdown-menu slot="dropdown">
-            <!--command点击菜单项触发的事件回调 -->
-            <el-dropdown-item command="111">111</el-dropdown-item>
-            <el-dropdown-item command="222" disabled>222</el-dropdown-item>
-            <el-dropdown-item command="333" divided>333</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+			  </el-container>
+         </el-container>              
       <el-button @click="drawer = true" type="primary" style="margin-left: 16px;"> 左侧打开 </el-button>     
     </div>
 </template>
 <script>
   //tooltip 内不支持 router-link 组件，请使用 vm.$router.push 代替。
-  // import imgs from '../assets/panda3.jpg';
+ import TongzhouEdit from './TongzhouEdit.vue';
 export default {
     name:'Tongzhou',
     data() {
@@ -200,6 +141,8 @@ export default {
 	          label: '双皮奶'
 	        }],
 	        value:'图层',
+	        valueJie:'街乡镇',
+	        valueCun:'村社区',
             datalist:[{
 	          id: 1,
 	          label: '变化房屋'
@@ -220,6 +163,8 @@ export default {
 	          id: 6,
 	          label: '边界'
         	}],
+        	value1:'图层选择',
+        	valueId:'请输入id',
         	datalist2:[
         	{
 	          id: 7,
@@ -315,6 +260,9 @@ export default {
     created() {
       this.countsImg=['s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds',]
     },
+    components:{//挂子
+       TongzhouEdit
+  }
 }
 
 // --mode 选项参数为命令行覆写默认的模式
