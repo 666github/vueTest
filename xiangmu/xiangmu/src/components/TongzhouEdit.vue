@@ -46,12 +46,14 @@ export default {
   }
 
 </script>
-<style scoped>
+<style >
 el-menu{border: solid 1px #DCDFE6;border-radius: 4px;height: 40px;line-height: 40px;}
 .el-menu.el-menu--horizontal{border-bottom: none;}
 .el-menu--horizontal>.el-menu-item,.el-menu--horizontal>.el-submenu{
 	height: 40px;line-height: 40px;border-radius: 4px;
-	border: 1px solid #DCDFE6;border-bottom-color:#DCDFE6!important;margin-top: 10px;
+	border: 1px solid #DCDFE6;border-bottom-color:#DCDFE6!important;
 }
-
+.el-menu--horizontal>.el-submenu{height: 38px;line-height: 38px;}
+/*导航 title样式调不了，去掉style的scoped*/
+.el-menu--horizontal>.el-submenu>.el-submenu__title{height: 40px;line-height: 40px;}
 </style>
