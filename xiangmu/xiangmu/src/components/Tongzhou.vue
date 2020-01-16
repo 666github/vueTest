@@ -6,13 +6,13 @@
 				        title="查询结果"
 				        :direction="direction"
 				        :visible.sync="drawer"
-				        :modal="false"
+				        :modal="false"				        
 				        size=300px
 				        :wrapperClosable="false">
 				        <span>暂无内容</span>
 		        	</el-drawer>
 		        </el-aside>
-			    <el-container>
+			    <el-container class="containerDiv">
 				    <el-header style="text-align: right; font-size: 12px">   
 				        <!-- 下拉 -->
 		                <el-dropdown>
@@ -25,9 +25,9 @@
 		                </el-dropdown>                  
 		                <span>已登录</span>
 		            </el-header>
-			   		<el-main class="mapContent" id="map">
+			   		<el-main class="mainDiv">
 		              	<el-container>
-						    <el-aside width="200px" style="background-color: rgb(238, 241, 246);">
+						    <el-aside width="200px" style="background-color: rgb(238, 241, 246);z-index:1;">
 				              	<div style="border: solid 1px red;border-radius: 5px 5px 0 0;">
 				              		<p style="text-align: center;height: 25px;margin: 5px 0;">菜单</p>
 				              		<el-tree
@@ -53,7 +53,7 @@
 					    	<el-main style="padding-top: 0;">   
 					    		<el-row :gutter="20">
 								  <el-col :span="8"><div class="grid-content bg-purple">						  	
-								  	<el-select v-model="value" placeholder="图层选择" style="width: 100px;">
+								  	<el-select v-model="value" placeholder="图层选择" style="width: 100px;z-index: 1;" @change="drawer = true">
 									    <el-option
 									      v-for="item in options"
 									      :key="item.value"
@@ -61,7 +61,7 @@
 									      :value="item.value">
 									    </el-option>
 								    </el-select>
-								    <el-select v-model="valueJie" placeholder="街乡镇" style="width: 100px;">
+								    <el-select v-model="valueJie" placeholder="街乡镇" style="width: 100px;z-index: 1;">
 									    <el-option
 									      v-for="item in options"
 									      :key="item.value"
@@ -69,7 +69,7 @@
 									      :value="item.value">
 									    </el-option>
 								    </el-select>
-								    <el-select v-model="valueCun" placeholder="村社区" style="width: 100px;">
+								    <el-select v-model="valueCun" placeholder="村社区" style="width: 100px;z-index: 1;">
 									    <el-option
 									      v-for="item in options"
 									      :key="item.value"
@@ -78,8 +78,9 @@
 									    </el-option>
 								    </el-select>
 								  </div></el-col>
-								  <el-col :span="6"><div class="grid-content bg-purple">
-								  	<el-select v-model="value1" placeholder="图层选择" style="width: 150px;">
+								  <el-col :span="6">
+								  	<div class="grid-content bg-purple">
+								  	<el-select v-model="value1" placeholder="图层选择" style="width: 150px;z-index: 1;">
 									    <el-option
 									      v-for="item in options"
 									      :key="item.value"
@@ -87,15 +88,22 @@
 									      :value="item.value">
 									    </el-option>
 								    </el-select>
-								    <el-input v-model="input" placeholder="请输入id" prefix-icon="el-icon-search" style="width: 100px;"></el-input>
-								  </div></el-col>
-								  <el-col :span="10"><div class="grid-content bg-purple"><TongzhouEdit style="float: right;"/></div></el-col>
-								</el-row>
+								    <el-input v-model="input" placeholder="请输入id" prefix-icon="el-icon-search" style="width: 100px;z-index: 1;"></el-input>
+								  </div>
+								  </el-col>
+									  <el-col :span="10">
+									  	<div class="grid-content bg-purple">
+									  		<TongzhouEdit style="float: right;"/>
+									    </div>
+									  </el-col>
+								</el-row>	
 		              		</el-main>
-					    </el-container>
-					    <el-button @click="drawer = true" type="primary" style="margin-left: 16px;"> 左侧打开 </el-button> 
+					    </el-container>					    
+					    <el-row class="mapDiv">
+						  <el-col :span="24" style="height: 100%;"><div class="grid-content bg-purple-dark mapContent" id="map" style="height: 100%;"> </div></el-col>
+						</el-row>
 		            </el-main>
-			        <el-footer>Footer</el-footer>
+			        <el-footer id="ft" ref='ft'>Footer</el-footer>
 			</el-container>             			  		  
         </el-container>   
     </div>
@@ -270,6 +278,7 @@ export default {
     },
     mounted() {//html加载完成后执行。执行顺序：子组件-父组件
       this.restaurants = this.loadAll();
+console.log(this.$refs.ft);
     },
     created() {
       this.countsImg=['s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds',]
@@ -338,6 +347,7 @@ export default {
 		map.addLayer(Imagelayer);
 		map.addLayer(Dzdtlayer);
 		map.addLayer(featureLayerXzbj);
+		Imagelayer.setVisibility(false);
 	})
 	.catch(err => {
 	  console.error(err)
@@ -364,4 +374,13 @@ export default {
   .el-aside {
     color: #333;
   }
+  .el-dialog__wrapper{width: 310px;}
+  /*.mainDiv{position: absolute;left: 10px;top: 60px;width: calc(100% - 20px);height: calc(100% - 120px );}*/
+  /*.el-footer{position: absolute;bottom: 0;left: 10px;width: calc(100% - 20px);border: solid 1px red;}*/
+ /*.mapDiv{position: absolute;left: 10px;top: 80px;width: calc(100% - 20px);height: calc(100% - 140px);}*/
+ /*.mainDiv{position: relative;z-index: 5000;}*/
+ .el-footer{border: solid 1px red;z-index: 1;position: fixed;bottom: 0;}
+ /*.el-footer{border: solid 1px red;z-index: 1;position: fixed;width: calc(100% - 20px);bottom: 0;}*/
+.mainDiv{position: fixed;top:60px;overflow: hidden;height: calc(100% - 120px);width: calc(100% - 18px);}
+.mapDiv{position: absolute;left: 0;top: 80px;width: 100%;height: calc(100% - 60px);}
 </style>

@@ -1,6 +1,6 @@
 <template>
    <div>
-   	 <el-menu  class="el-menu-demo" mode="horizontal" @select="handleSelect" >
+   	 <el-menu  class="el-menu-demo" mode="horizontal" @select="handleSelect" style="z-index: 1;">
 	  <el-submenu index="1">
 	    <template slot="title">视图测算</template>
 	    <el-menu-item index="1-1">长度测算</el-menu-item>
