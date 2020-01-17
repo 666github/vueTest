@@ -94,14 +94,14 @@
 								  </el-col>
 									  <el-col :span="10">
 									  	<div class="grid-content bg-purple">
-									  		<TongzhouEdit style="float: right;"/>
+									  		<TongzhouEdit  ref="headerChild" style="float: right;"/>
 									    </div>
 									  </el-col>
 								</el-row>	
 		              		</el-main>
 					    </el-container>					    
 					    <el-row class="mapDiv">
-						  <el-col :span="24" style="height: 100%;"><div class="grid-content bg-purple-dark mapContent" id="map" style="height: 100%;"> </div></el-col>
+						  <el-col :span="24" style="height: 100%;"><div class="grid-content bg-purple-dark mapContent" id="map" ref="map" style="height: 100%;"> </div></el-col>
 						</el-row>
 		            </el-main>
 			        <el-footer id="ft" ref='ft'>Footer</el-footer>
@@ -190,7 +190,8 @@ export default {
 	        fwFeatureLayer_fsss:'',
 	        fwFeatureLayer_xqfw:'',
 	        fwFeatureLayer:'',
-	        Xzbjlayer:''
+	        Xzbjlayer:'',
+	        drawToolbar:''
         }
     },
     methods: {
@@ -247,7 +248,7 @@ export default {
 		},
     },
     mounted() {//html加载完成后执行。执行顺序：子组件-父组件
-//    this.restaurants = this.loadAll();
+		console.log("父组件获取子组件data"+this.$refs.headerChild.activeIndex);//父组件获取子组件data 根据ref
     },
     created() {
     	//底图服务
@@ -411,6 +412,11 @@ export default {
 		this.fwFeatureLayer_qfx.setVisibility(false);
 		this.fwFeatureLayer_fsss.setVisibility(false);		
 		this.fwFeatureLayer_dxkj.setVisibility(false);
+		//测量工具
+		this.drawToolbar = new Draw(map, {
+            tooltipOffset: 20,
+            drawTime: 90
+        });console.log(this.drawToolbar)
 	})
 	.catch(err => {
 	  console.error(err)

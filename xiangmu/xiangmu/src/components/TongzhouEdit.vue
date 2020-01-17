@@ -39,9 +39,101 @@ export default {
       };
     },
     methods: {
-      handleSelect(key, keyPath) {
-        console.log(key, keyPath);
-      }
+      	handleSelect(key, keyPath) {
+        	console.log(key, keyPath);
+	        switch (key){
+	        	case "1-1":console.log(this)
+//	        		this.$parent.__drawToolbar.activate(esri.toolbars.Draw.POLYLINE);
+//			        this.$parent.__drawEvent = dojo.connect(__drawToolbar, 'onDrawEnd', areaOrLength);
+	        		break;
+	        	default:
+	        		break;
+	        }
+        },
+ 		areaOrLength(geometry) {
+		    mapClear();
+		    geometry.spatialReference.wkid = 2436;
+		    switch (geometry.type) {
+		        case "point":
+		            var symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, 10, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 0, 0]), 2), new dojo.Color([255, 0, 0, 0.05]));
+		            graphicCenterPoint = geometry;
+		            break;
+		        case "polyline":
+		            var symbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 0, 0]), 1);
+		            //获得每个点的经纬度坐标
+		            var points = geometry.paths[0];
+		            var distance, lineLength = 0;
+		            var result = {};
+		            var lengths = {};
+		            for (var i = 0; i < points.length - 1; i++) {
+		                var x1 = points[i][1];
+		                var y1 = points[i][0];
+		                var x2 = points[i + 1][1];
+		                var y2 = points[i + 1][0];
+		                distance = getFlatternDistance2(x1, y1, x2, y2);
+		                lineLength = distance += lineLength;
+		            }
+		            lengths['0'] = lineLength;
+		            result.lengths = lengths;
+		            outputAreaAndLength(result, geometry);//result获得平面坐标
+		            break;
+		        case "polygon":
+		            var symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_NULL, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 0, 0]), 1), new dojo.Color([255, 255, 0, 0]));
+		            var points = new Array();
+		            var result = {};
+		            var areas = {};
+		            var rings = geometry.rings[0];
+		            for (var i = 0; i < rings.length; i++) {
+		                var x = rings[i][1];
+		                var y = rings[i][0];
+		//              var xy = wgs84Tosh(x, y);
+		//              points.push(xy);
+						points.push([x,y]);
+		            }
+		            areas['0'] = polygonArea(points);
+		            result.areas = areas;
+		            outputAreaAndLength(result, geometry);
+		            break;
+		    }
+	    var graphic = new esri.Graphic(geometry, symbol);
+	    map.graphics.clear();
+	    map.graphics.add(graphic);
+	    __drawToolbar.deactivate();
+	    dojo.disconnect(__drawEvent);
+	    __drawEvent = null;
+	},
+	mapClear() {
+	    map.graphics.clear();
+	    map.infoWindow.hide();	    
+	},
+	outputAreaAndLength(result, geo) {
+	    var point = geo.getExtent().getCenter();
+	    map.infoWindow.resize(270, 300);//设置窗口大小
+	    var txt = "";
+	    if (result.areas != null) {
+	        var num = result.areas[0].toFixed(2);
+	        var info = num + "平方米";
+	        if (num > 999999) {
+	            info = (num / 1000000).toFixed(2) + "平方千米";
+	            if (num / 1000000 > 999)
+	                info = (num / 1000000 / 10000).toFixed(2) + "万平方千米";
+	        }
+	        map.infoWindow.setTitle("面积测算");
+	        map.infoWindow.setContent("面积：" + info);
+	        map.infoWindow.show(point);
+	    } else {
+	        var num = result.lengths[0].toFixed(2);
+	        var info = num + "米";
+	        if (num > 999) {
+	            info = (num / 1000).toFixed(2) + "千米";
+	            if (num / 1000 > 999)
+	                info = (num / 1000 / 10000).toFixed(2) + "万千米";
+	        }
+	        map.infoWindow.setTitle("长度测算");
+	        map.infoWindow.setContent("距离：" + info);
+	        map.infoWindow.show(point);
+	    }
+	},
     }
   }
 
