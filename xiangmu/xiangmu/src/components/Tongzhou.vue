@@ -36,6 +36,7 @@
 								      node-key="id"
 								      ref="tree"
 								      highlight-current
+								      @check-change="handleCheckChangeTree"
 								      :default-checked-keys="[1,4]"
 								      :props="defaultProps">
 								  	</el-tree>
@@ -182,7 +183,14 @@ export default {
 	        },
 	        clickid:'1',
 	        Imagelayer:'',
-	        Dzdtlayer:''
+	        Dzdtlayer:'',
+	        Qdrlayer:'',
+	        fwFeatureLayer_bhfw:'',
+	        fwFeatureLayer_qfx:'',
+	        fwFeatureLayer_fsss:'',
+	        fwFeatureLayer_xqfw:'',
+	        fwFeatureLayer:'',
+	        Xzbjlayer:''
         }
     },
     methods: {
@@ -192,31 +200,69 @@ export default {
 		  	this.clickid=data.id;//不同层级切换时，如果切换到的状态为选中，则通过一个变量先保存下它的id，与后面再度切换进行对边（查看是不是不同层级的切换）
 		    let arrclick = [data.id];
 		    this.$refs.tree.setCheckedKeys(arrclick);
-		    console.log(arrclick[0],this.Imagelayer)
+//		    console.log(arrclick[0],this.Imagelayer)
 		    switch (arrclick[0]) {
 		        case 71:
 		            this.Imagelayer.setVisibility(true);
 		            this.Dzdtlayer.setVisibility(false);
-//		            Qdrlayer.setVisibility(false);
+		            this.Qdrlayer.setVisibility(false);
 		            break;
 		        case 72:
 		            this.Imagelayer.setVisibility(false);
 		            this.Dzdtlayer.setVisibility(true);
-//		            Qdrlayer.setVisibility(false);
-		            break;		        
+		            this.Qdrlayer.setVisibility(false);
+		            break;
+		        case 73:
+		            this.Imagelayer.setVisibility(false);
+		            this.Dzdtlayer.setVisibility(false);
+		            this.Qdrlayer.setVisibility(true);
+		            break;
 		    }
 		  }
 		  if(!checked &&(data.id==this.clickid)){//如果点击是选中的本身 还是将选中赋值给自身
 		  	this.$refs.tree.setCheckedKeys([data.id]);
 		  }		  
 		}, 
+		handleCheckChangeTree(data, checked, indeterminate){//树形控件 大tree
+			switch (data.id) {
+		        case 1:
+		            this.fwFeatureLayer_bhfw.setVisibility(checked);        
+		            break;
+		        case 2:
+		            this.fwFeatureLayer_qfx.setVisibility(checked);        
+		            break;
+		        case 3:
+		            this.fwFeatureLayer_fsss.setVisibility(checked);        
+		            break;
+		        case 4:
+		            this.fwFeatureLayer_xqfw.setVisibility(checked);        
+		            break;
+		        case 5:
+		            this.fwFeatureLayer.setVisibility(checked);        
+		            break;
+		        case 6:
+		            this.Xzbjlayer.setVisibility(checked);        
+		            break;
+		   }
+		},
     },
     mounted() {//html加载完成后执行。执行顺序：子组件-父组件
 //    this.restaurants = this.loadAll();
     },
     created() {
+    	//底图服务
+	var urlPrefix="http://tzfw.natapp1.cc/arcgis/rest/services/";
     let tzdz_url="http://tzfw.natapp1.cc/arcgis/rest/services/TZDZDT/MapServer";//电子地图
 	let tzyx_url="http://tzfw.natapp1.cc/arcgis/rest/services/ImageTZ/MapServer";//影像服务	
+	var tzqdr_url="http://tzfw.natapp1.cc/arcgis/rest/services/TZQDR/MapServer";//qdr
+	var tzxzbj_url="http://tzfw.natapp1.cc/arcgis/rest/services/TZXZBJ/MapServer";//边界
+	var tzfeature_url_bhfw=urlPrefix+"WWWFFF/FeatureServer/0";//要素服务_变化房屋
+	var tzfeature_url_qfx=urlPrefix+"WWWFFF/FeatureServer/1";//要素服务_切分线
+	var tzfeature_url_fsss=urlPrefix+"WWWFFF/FeatureServer/2";//要素服务_附属设施
+	var tzfeature_url_xqfw=urlPrefix+"WWWFFF/FeatureServer/3";//要素服务_小区范围
+	var tzfeature_url=urlPrefix+"WWWFFF/FeatureServer/4";//要素服务_房屋
+	var tzfeature_url_dxkj=urlPrefix+"WWWFFF/FeatureServer/5";//要素服务_地下空间
+	var tzmapserver_url=urlPrefix+"WWWFFF/MapServer";//要素服务
 	let map;
 	const options = {
   		url: 'http://localhost/arcgis_js_v327_api/arcgis_js_api/library/3.27/3.27compact/init.js' // 这里的API地址可以是官网提供的CDN，也可在此配置离线部署的地址
@@ -264,7 +310,9 @@ export default {
 		});
 		this.Imagelayer = new esri.layers.ArcGISTiledMapServiceLayer(tzyx_url);//影像
 		this.Dzdtlayer = new esri.layers.ArcGISTiledMapServiceLayer(tzdz_url);//电子
-			var featureLayerXzbj=new FeatureLayer( "http://tzfw.natapp1.cc/arcgis/rest/services/TZXZBJ/MapServer/0", {
+		this.Qdrlayer = new esri.layers.ArcGISTiledMapServiceLayer(tzqdr_url);//qdr
+		this.Xzbjlayer = new ArcGISDynamicMapServiceLayer(tzxzbj_url);
+		var featureLayerXzbj=new FeatureLayer( "http://tzfw.natapp1.cc/arcgis/rest/services/TZXZBJ/MapServer/0", {
    			mode: FeatureLayer.MODE_SNAPSHOT,
 		    outFields: ["*"]
 		});
@@ -281,6 +329,88 @@ export default {
 		map.addLayer(this.Dzdtlayer);
 		map.addLayer(featureLayerXzbj);
 		this.Imagelayer.setVisibility(false);
+		this.Qdrlayer.setVisibility(false);
+		
+		//房屋变化弹框
+        var infoTemplate_bhfw = new InfoTemplate("<i class='fa fa-fw fa-file'>房屋变化信息</i>",function click(fea) {
+            return clickBHFW(fea);
+        });		
+		var featureLayerOptions_bhfw = {
+		  id: "OBJECTID_0",
+		  mode: FeatureLayer.MODE_ONDEMAND,
+		  outFields: ["*"],
+		  infoTemplate: infoTemplate_bhfw,
+		};		
+		this.fwFeatureLayer_bhfw = new FeatureLayer(tzfeature_url_bhfw, featureLayerOptions_bhfw);
+		//切分线弹框
+        var infoTemplate_qfx = new InfoTemplate("<i class='fa fa-fw fa-file'>切分线信息</i>",function click(fea) {
+            return clickQFX(fea);
+        });		
+		var featureLayerOptions_qfx = {
+		  id: "OBJECTID_1",
+		  mode: FeatureLayer.MODE_ONDEMAND,
+		  outFields: ["*"],
+		  infoTemplate: infoTemplate_qfx,
+		};		
+		this.fwFeatureLayer_qfx = new FeatureLayer(tzfeature_url_qfx, featureLayerOptions_qfx);
+		//附属设施弹框
+        var infoTemplate_fsss = new InfoTemplate("<i class='fa fa-fw fa-file'>附属设施信息</i>",function click(fea) {
+            return clickFSSS(fea);
+        });		
+		var featureLayerOptions_fsss = {
+		  id: "OBJECTID_2",
+		  mode: FeatureLayer.MODE_ONDEMAND,
+		  outFields: ["*"],
+		  infoTemplate: infoTemplate_fsss,
+		};		
+		this.fwFeatureLayer_fsss = new FeatureLayer(tzfeature_url_fsss, featureLayerOptions_fsss);
+		//小区范围弹框
+        var infoTemplate_xqfw = new InfoTemplate("<i class='fa fa-fw fa-file'>小区范围信息</i>",function click(fea) {
+           return clickXQFW(fea);
+        });		
+		var featureLayerOptions_xqfw = {
+		  id: "OBJECTID_3",
+		  mode: FeatureLayer.MODE_ONDEMAND,
+		  outFields: ["*"],
+		  infoTemplate: infoTemplate_xqfw,
+		};		
+		this.fwFeatureLayer_xqfw = new FeatureLayer(tzfeature_url_xqfw, featureLayerOptions_xqfw);
+		//房屋信息弹框
+        var infoTemplate = new InfoTemplate("<i class='fa fa-fw fa-file'>房屋数据信息</i>",function click(fea) { 
+            return clickFWSJ(fea);
+        });
+        var fw_featureLayerOptions = {
+		  id: "OBJECTID_4",
+		  mode: FeatureLayer.MODE_ONDEMAND,
+		  outFields: ["*"],
+		  infoTemplate: infoTemplate,
+		};
+		this.fwFeatureLayer = new FeatureLayer(tzfeature_url, fw_featureLayerOptions);
+		this.fwFeatureLayer.minScale=10000;
+		//地下空间无弹框
+//		var infoTemplate = new InfoTemplate("<i class='fa fa-fw fa-file'>地下空间信息</i>",function click(fea) {           
+//          return clickDXKJ(fea);
+//      });
+        var featureLayerOptions_dxkj = {
+		  id: "OBJECTID_5",
+		  mode: FeatureLayer.MODE_ONDEMAND,
+		  outFields: ["*"],
+//		  infoTemplate: infoTemplate,
+		};
+		this.fwFeatureLayer_dxkj = new FeatureLayer(tzfeature_url_dxkj, featureLayerOptions_dxkj);
+		//添加各要素图层
+//		map.addLayer(fwFeatureLayer_dxkj);//地下空间
+		this.fwFeatureLayer.setDefinitionExpression(`(NYSJZT!='-1' or NYSJZT IS NULL) and (SJZT!='-1' or SJZT IS NULL) `);//不显示内业数据状态是-1和外业数据状态是-1状态graphics 参数是sql语句
+		this.fwFeatureLayer_bhfw.setDefinitionExpression(`(NYSJZT!='-1' or NYSJZT IS NULL) and (SJZT!='-1' or SJZT IS NULL)`);//不显示-1状态graphics
+		this.fwFeatureLayer_fsss.setDefinitionExpression(`(NYSJZT!='-1' or NYSJZT IS NULL) and (SJZT!='-1' or SJZT IS NULL)`);//不显示-1状态graphics
+		this.fwFeatureLayer_xqfw.setDefinitionExpression(`(NYSJZT!='-1' or NYSJZT IS NULL) and (SJZT!='-1' or SJZT IS NULL)`);//不显示-1状态graphics
+		map.addLayers([this.fwFeatureLayer_xqfw,this.fwFeatureLayer,this.fwFeatureLayer_bhfw,this.fwFeatureLayer_fsss,this.fwFeatureLayer_qfx]);
+		this.fwFeatureLayer.minScale = 5000;
+		this.fwFeatureLayer_fsss.minScale = 5000;
+		this.fwFeatureLayer.setVisibility(false);
+		this.fwFeatureLayer_qfx.setVisibility(false);
+		this.fwFeatureLayer_fsss.setVisibility(false);		
+		this.fwFeatureLayer_dxkj.setVisibility(false);
 	})
 	.catch(err => {
 	  console.error(err)
