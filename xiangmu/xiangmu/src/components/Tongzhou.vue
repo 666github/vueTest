@@ -53,9 +53,9 @@
 					    	<el-main style="padding-top: 0;">   
 					    		<el-row :gutter="20">
 								  <el-col :span="8"><div class="grid-content bg-purple">						  	
-								  	<el-select v-model="value" placeholder="图层选择" style="width: 100px;z-index: 1;" @change="drawer = true">
+								  	<el-select v-model="value" placeholder="图层选择" style="width: 120px;z-index: 1;" @change="drawer = true">
 									    <el-option
-									      v-for="item in options"
+									      v-for="item in tcselect1"
 									      :key="item.value"
 									      :label="item.label"
 									      :value="item.value">
@@ -63,7 +63,7 @@
 								    </el-select>
 								    <el-select v-model="valueJie" placeholder="街乡镇" style="width: 100px;z-index: 1;">
 									    <el-option
-									      v-for="item in options"
+									      v-for="item in tcselect1"
 									      :key="item.value"
 									      :label="item.label"
 									      :value="item.value">
@@ -71,7 +71,7 @@
 								    </el-select>
 								    <el-select v-model="valueCun" placeholder="村社区" style="width: 100px;z-index: 1;">
 									    <el-option
-									      v-for="item in options"
+									      v-for="item in tcselect1"
 									      :key="item.value"
 									      :label="item.label"
 									      :value="item.value">
@@ -80,9 +80,9 @@
 								  </div></el-col>
 								  <el-col :span="6">
 								  	<div class="grid-content bg-purple">
-								  	<el-select v-model="value1" placeholder="图层选择" style="width: 150px;z-index: 1;">
+								  	<el-select v-model="value1" placeholder="图层选择" style="width: 120px;z-index: 1;">
 									    <el-option
-									      v-for="item in options"
+									      v-for="item in tcselect1"
 									      :key="item.value"
 									      :label="item.label"
 									      :value="item.value">
@@ -115,54 +115,27 @@ import TongzhouEdit from './TongzhouEdit.vue';
 export default {
     name:'Tongzhou',
     data() {
-        const item = [
-        {
-            date: '2016-05-02',
-            name: '图幅',
-            address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-            date: '2016-05-02',
-            name: 'dfg',
-            address: '上海市dfgdfsgfg 弄'
-        }
-        ];
-        const item2={
-            date2: '2888-25-22',
-            name2: 'ss虎',
-            address2: '来看是姐夫老家类似的加冯兰'
-        };
-        return {
-            message:'myvue,s data2',
-            visible:false,
-            tableData: item,
-            tableData2: Array(3).fill(item2),
-            radio: '选中且禁用',
-            checkAll: false,
-            checkedCities: ['q', 'w'],
-            checked:true,
-            isIndeterminate: true,
-            cities:['q','w','er','s'],
+        return {           
             input:'',
-            textarea:'',
-            fuheinput:'',
-            select:'',
-            restaurants: [],
-            dialogVisible: false,
-            // fits:[{fitImg:'fill',url:imgs,title:'fill'}]
-            count: 0,
-            countsImg:[],
             drawer: false,
             direction: 'ltr',
-            forChildMsg:'1234567890',
-            options: [{
-	          value: '黄金糕',
-	          label: '黄金糕'
+			value:'图层',
+            tcselect1: [{
+	          value: 0,
+	          label: '变化房屋'
 	        }, {
-	          value: '双皮奶',
-	          label: '双皮奶'
-	        }],
-	        value:'图层',
+	          value: 1,
+	          label: '附属设施'
+        	},{
+	          value: 2,
+	          label: '小区范围'
+        	},{
+	          value: 3,
+	          label: '房屋数据'
+        	},{
+	          value: 4,
+	          label: '分割线'
+	        }],	        
 	        valueJie:'街乡镇',
 	        valueCun:'村社区',
             datalist:[{
@@ -207,7 +180,9 @@ export default {
 	          children: 'children',
 	          label: 'label'
 	        },
-	        clickid:'1'
+	        clickid:'1',
+	        Imagelayer:'',
+	        Dzdtlayer:''
         }
     },
     methods: {
@@ -217,76 +192,34 @@ export default {
 		  	this.clickid=data.id;//不同层级切换时，如果切换到的状态为选中，则通过一个变量先保存下它的id，与后面再度切换进行对边（查看是不是不同层级的切换）
 		    let arrclick = [data.id];
 		    this.$refs.tree.setCheckedKeys(arrclick);
+		    console.log(arrclick[0],this.Imagelayer)
+		    switch (arrclick[0]) {
+		        case 71:
+		            this.Imagelayer.setVisibility(true);
+		            this.Dzdtlayer.setVisibility(false);
+//		            Qdrlayer.setVisibility(false);
+		            break;
+		        case 72:
+		            this.Imagelayer.setVisibility(false);
+		            this.Dzdtlayer.setVisibility(true);
+//		            Qdrlayer.setVisibility(false);
+		            break;		        
+		    }
 		  }
 		  if(!checked &&(data.id==this.clickid)){//如果点击是选中的本身 还是将选中赋值给自身
 		  	this.$refs.tree.setCheckedKeys([data.id]);
 		  }		  
-		},
-      changeFun (val){
-        console.log(val);//lable:Radio 的 value;change事件来响应变化，它会传入一个参数value
-      },
-      handleCheckAllChange(val) {
-        this.checkedCities = val ? ['q','w','er','s'] : [];
-        this.isIndeterminate = false;
-      },
-      handleCheckedCitiesChange(value) {
-        let checkedCount = value.length;
-        this.checkAll = checkedCount === this.cities.length;
-        this.isIndeterminate = checkedCount > 0 && checkedCount < this.cities.length;
-      },
-      querySearch(queryString, cb) {
-        var restaurants = this.restaurants;
-        var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
-        // 调用 callback 返回建议列表的数据
-        cb(results);
-      },
-      createFilter(queryString) {
-        return (restaurant) => {
-          return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
-        };
-      },
-      loadAll() {
-        return [
-          { "value": "三全鲜食（北新泾店）", "address": "长宁区新渔路144号" },
-          { "value": "Hot honey 首尔炸鸡（仙霞路）", "address": "上海市长宁区淞虹路661号" },
-          { "value": "新旺角茶餐厅", "address": "上海市普陀区真北路988号创邑金沙谷6号楼113" }
-        ];
-      },
-      handleSelect(item) {
-        console.log(item);
-      },
-      handleChange(value){//计数变化时
-        console.log(value);
-      },
-      tabClick(tab, event){
-        // console.log(tab, event);
-        console.log(tab._vnode.children[0].text);//tab切换时显示的文本内容
-      },
-      handleCommand(command) {//下拉点击事件
-        console.log('click on item ' + command+'command的值');
-      },
-      handleClose(done) {
-        this.$confirm('确认关闭？')
-          .then(_ => {
-            done();
-          })
-          .catch(_ => {});
-      },
-      loads () {         
-          if (this.count<this.countsImg.length) {this.count+= 1;}
-      }  
+		}, 
     },
     mounted() {//html加载完成后执行。执行顺序：子组件-父组件
-      this.restaurants = this.loadAll();this.$refs.containerDiv.$el.style.width=window.screen.height;console.log(window.screen.height)
-      console.log(this.$refs.containerDiv.$el.offsetHeight,window.screen.height,this.$refs.containerDiv.$el.style.width);
+//    this.restaurants = this.loadAll();
     },
     created() {
-      this.countsImg=['s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds',]
-      var tzdz_url="http://tzfw.natapp1.cc/arcgis/rest/services/TZDZDT/MapServer";//电子地图
-	 var tzyx_url="http://tzfw.natapp1.cc/arcgis/rest/services/ImageTZ/MapServer";//影像服务	
-	var map;
+    let tzdz_url="http://tzfw.natapp1.cc/arcgis/rest/services/TZDZDT/MapServer";//电子地图
+	let tzyx_url="http://tzfw.natapp1.cc/arcgis/rest/services/ImageTZ/MapServer";//影像服务	
+	let map;
 	const options = {
-  	url: 'http://localhost/arcgis_js_v327_api/arcgis_js_api/library/3.27/3.27compact/init.js' // 这里的API地址可以是官网提供的CDN，也可在此配置离线部署的地址
+  		url: 'http://localhost/arcgis_js_v327_api/arcgis_js_api/library/3.27/3.27compact/init.js' // 这里的API地址可以是官网提供的CDN，也可在此配置离线部署的地址
 	}
 	esriLoader.loadModules([
 		"esri/map",
@@ -329,8 +262,8 @@ export default {
 			//        center: [-83.244, 42.581],
 			zoom: 2
 		});
-		var Imagelayer = new esri.layers.ArcGISTiledMapServiceLayer(tzyx_url);//影像
-		var Dzdtlayer = new esri.layers.ArcGISTiledMapServiceLayer(tzdz_url);//电子
+		this.Imagelayer = new esri.layers.ArcGISTiledMapServiceLayer(tzyx_url);//影像
+		this.Dzdtlayer = new esri.layers.ArcGISTiledMapServiceLayer(tzdz_url);//电子
 			var featureLayerXzbj=new FeatureLayer( "http://tzfw.natapp1.cc/arcgis/rest/services/TZXZBJ/MapServer/0", {
    			mode: FeatureLayer.MODE_SNAPSHOT,
 		    outFields: ["*"]
@@ -344,10 +277,10 @@ export default {
 		var rendererXzbj = new SimpleRenderer(defaultSymbolXzbj);
 		featureLayerXzbj.setRenderer(rendererXzbj);
 		
-		map.addLayer(Imagelayer);
-		map.addLayer(Dzdtlayer);
+		map.addLayer(this.Imagelayer );
+		map.addLayer(this.Dzdtlayer);
 		map.addLayer(featureLayerXzbj);
-		Imagelayer.setVisibility(false);
+		this.Imagelayer.setVisibility(false);
 	})
 	.catch(err => {
 	  console.error(err)
@@ -374,14 +307,8 @@ export default {
   .el-aside {
     color: #333;
   }
-  .el-dialog__wrapper{width: 310px;}
-  /*.mainDiv{position: absolute;left: 10px;top: 60px;width: calc(100% - 20px);height: calc(100% - 120px );}*/
-  /*.el-footer{position: absolute;bottom: 0;left: 10px;width: calc(100% - 20px);border: solid 1px red;}*/
- /*.mapDiv{position: absolute;left: 10px;top: 80px;width: calc(100% - 20px);height: calc(100% - 140px);}*/
- /*.mainDiv{position: relative;z-index: 5000;}*/
+ .el-dialog__wrapper{width: 310px;}
  .el-footer{border: solid 1px red;z-index: 1;position: absolute;bottom: 0;width: 100%;}
- /*.el-footer{border: solid 1px red;z-index: 1;position: fixed;width: calc(100% - 20px);bottom: 0;}*/
-/*.mainDiv{position: fixed;top:60px;overflow: hidden;height: calc(100% - 120px);width: calc(100% - 18px);border: solid 1px red;}*/
 .mapDiv{position: absolute;left: 0;top: 60px;width: 100%;height: calc(100% - 60px);}
 .mainDiv{position: absolute;top:60px;overflow: hidden;width:100%;border: solid 1px red;height: calc(100% - 120px)}
 .containerDiv{position: relative;height: 100%;}
