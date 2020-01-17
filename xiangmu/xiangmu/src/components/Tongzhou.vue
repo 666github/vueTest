@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <el-container style=" border: 1px solid #eee">                                 
+    <div style="height: 100%;width: calc(100% - 18px);">
+        <el-container style=" border: 1px solid #eee;height: 100%;width: 100%;">                                 
 		        <el-aside v-show="drawer">
 		      		<el-drawer
 				        title="查询结果"
@@ -12,7 +12,7 @@
 				        <span>暂无内容</span>
 		        	</el-drawer>
 		        </el-aside>
-			    <el-container class="containerDiv">
+			    <el-container class="containerDiv" ref="containerDiv">
 				    <el-header style="text-align: right; font-size: 12px">   
 				        <!-- 下拉 -->
 		                <el-dropdown>
@@ -277,8 +277,8 @@ export default {
       }  
     },
     mounted() {//html加载完成后执行。执行顺序：子组件-父组件
-      this.restaurants = this.loadAll();
-console.log(this.$refs.ft);
+      this.restaurants = this.loadAll();this.$refs.containerDiv.$el.style.width=window.screen.height;console.log(window.screen.height)
+      console.log(this.$refs.containerDiv.$el.offsetHeight,window.screen.height,this.$refs.containerDiv.$el.style.width);
     },
     created() {
       this.countsImg=['s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds','s','r','geag','sdfsdfds',]
@@ -379,8 +379,10 @@ console.log(this.$refs.ft);
   /*.el-footer{position: absolute;bottom: 0;left: 10px;width: calc(100% - 20px);border: solid 1px red;}*/
  /*.mapDiv{position: absolute;left: 10px;top: 80px;width: calc(100% - 20px);height: calc(100% - 140px);}*/
  /*.mainDiv{position: relative;z-index: 5000;}*/
- .el-footer{border: solid 1px red;z-index: 1;position: fixed;bottom: 0;}
+ .el-footer{border: solid 1px red;z-index: 1;position: absolute;bottom: 0;width: 100%;}
  /*.el-footer{border: solid 1px red;z-index: 1;position: fixed;width: calc(100% - 20px);bottom: 0;}*/
-.mainDiv{position: fixed;top:60px;overflow: hidden;height: calc(100% - 120px);width: calc(100% - 18px);}
-.mapDiv{position: absolute;left: 0;top: 80px;width: 100%;height: calc(100% - 60px);}
+/*.mainDiv{position: fixed;top:60px;overflow: hidden;height: calc(100% - 120px);width: calc(100% - 18px);border: solid 1px red;}*/
+.mapDiv{position: absolute;left: 0;top: 60px;width: 100%;height: calc(100% - 60px);}
+.mainDiv{position: absolute;top:60px;overflow: hidden;width:100%;border: solid 1px red;height: calc(100% - 120px)}
+.containerDiv{position: relative;height: 100%;}
 </style>
