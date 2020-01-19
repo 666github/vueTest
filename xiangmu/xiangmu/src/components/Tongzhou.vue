@@ -191,7 +191,7 @@ export default {
 	        fwFeatureLayer_xqfw:'',
 	        fwFeatureLayer:'',
 	        Xzbjlayer:'',
-	        drawToolbar:''
+	        
         }
     },
     methods: {
@@ -264,7 +264,7 @@ export default {
 	var tzfeature_url=urlPrefix+"WWWFFF/FeatureServer/4";//要素服务_房屋
 	var tzfeature_url_dxkj=urlPrefix+"WWWFFF/FeatureServer/5";//要素服务_地下空间
 	var tzmapserver_url=urlPrefix+"WWWFFF/MapServer";//要素服务
-	let map;
+//	let map;
 	const options = {
   		url: 'http://localhost/arcgis_js_v327_api/arcgis_js_api/library/3.27/3.27compact/init.js' // 这里的API地址可以是官网提供的CDN，也可在此配置离线部署的地址
 	}
@@ -301,7 +301,7 @@ export default {
 		"dijit/form/Button", "dojo/domReady!"], options) // 传入需要使用的类
 	.then(([Map,ArcGISDynamicMapServiceLayer, UndoManager, GeometryService,GraphicsLayer,Extent, Draw, Edit,Navigation, Cut, Union, Graphic, geometryEngine, esriConfig,InfoTemplate,
 		FeatureLayer, Query, Color,SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol,TemplatePicker,SimpleRenderer, connect,arrayUtils, event, lang, parser, registry]) => {
-	  		map = new Map("map", {			
+	  		this.$root.map = new Map("map", {			
 //			basemap: tzyx_url,
 			//去掉esri图标和缩放图标
 			logo:false,
@@ -326,15 +326,15 @@ export default {
 		var rendererXzbj = new SimpleRenderer(defaultSymbolXzbj);
 		featureLayerXzbj.setRenderer(rendererXzbj);
 		
-		map.addLayer(this.Imagelayer );
-		map.addLayer(this.Dzdtlayer);
-		map.addLayer(featureLayerXzbj);
+		this.$root.map.addLayer(this.Imagelayer );
+		this.$root.map.addLayer(this.Dzdtlayer);
+		this.$root.map.addLayer(featureLayerXzbj);
 		this.Imagelayer.setVisibility(false);
 		this.Qdrlayer.setVisibility(false);
 		
 		//房屋变化弹框
         var infoTemplate_bhfw = new InfoTemplate("<i class='fa fa-fw fa-file'>房屋变化信息</i>",function click(fea) {
-            return clickBHFW(fea);
+//          return clickBHFW(fea);
         });		
 		var featureLayerOptions_bhfw = {
 		  id: "OBJECTID_0",
@@ -345,7 +345,7 @@ export default {
 		this.fwFeatureLayer_bhfw = new FeatureLayer(tzfeature_url_bhfw, featureLayerOptions_bhfw);
 		//切分线弹框
         var infoTemplate_qfx = new InfoTemplate("<i class='fa fa-fw fa-file'>切分线信息</i>",function click(fea) {
-            return clickQFX(fea);
+//          return clickQFX(fea);
         });		
 		var featureLayerOptions_qfx = {
 		  id: "OBJECTID_1",
@@ -356,7 +356,7 @@ export default {
 		this.fwFeatureLayer_qfx = new FeatureLayer(tzfeature_url_qfx, featureLayerOptions_qfx);
 		//附属设施弹框
         var infoTemplate_fsss = new InfoTemplate("<i class='fa fa-fw fa-file'>附属设施信息</i>",function click(fea) {
-            return clickFSSS(fea);
+//          return clickFSSS(fea);
         });		
 		var featureLayerOptions_fsss = {
 		  id: "OBJECTID_2",
@@ -367,7 +367,7 @@ export default {
 		this.fwFeatureLayer_fsss = new FeatureLayer(tzfeature_url_fsss, featureLayerOptions_fsss);
 		//小区范围弹框
         var infoTemplate_xqfw = new InfoTemplate("<i class='fa fa-fw fa-file'>小区范围信息</i>",function click(fea) {
-           return clickXQFW(fea);
+//         return clickXQFW(fea);
         });		
 		var featureLayerOptions_xqfw = {
 		  id: "OBJECTID_3",
@@ -378,7 +378,7 @@ export default {
 		this.fwFeatureLayer_xqfw = new FeatureLayer(tzfeature_url_xqfw, featureLayerOptions_xqfw);
 		//房屋信息弹框
         var infoTemplate = new InfoTemplate("<i class='fa fa-fw fa-file'>房屋数据信息</i>",function click(fea) { 
-            return clickFWSJ(fea);
+//          return clickFWSJ(fea);
         });
         var fw_featureLayerOptions = {
 		  id: "OBJECTID_4",
@@ -405,18 +405,23 @@ export default {
 		this.fwFeatureLayer_bhfw.setDefinitionExpression(`(NYSJZT!='-1' or NYSJZT IS NULL) and (SJZT!='-1' or SJZT IS NULL)`);//不显示-1状态graphics
 		this.fwFeatureLayer_fsss.setDefinitionExpression(`(NYSJZT!='-1' or NYSJZT IS NULL) and (SJZT!='-1' or SJZT IS NULL)`);//不显示-1状态graphics
 		this.fwFeatureLayer_xqfw.setDefinitionExpression(`(NYSJZT!='-1' or NYSJZT IS NULL) and (SJZT!='-1' or SJZT IS NULL)`);//不显示-1状态graphics
-		map.addLayers([this.fwFeatureLayer_xqfw,this.fwFeatureLayer,this.fwFeatureLayer_bhfw,this.fwFeatureLayer_fsss,this.fwFeatureLayer_qfx]);
+		this.$root.map.addLayers([this.fwFeatureLayer_xqfw,this.fwFeatureLayer,this.fwFeatureLayer_bhfw,this.fwFeatureLayer_fsss,this.fwFeatureLayer_qfx]);
 		this.fwFeatureLayer.minScale = 5000;
 		this.fwFeatureLayer_fsss.minScale = 5000;
 		this.fwFeatureLayer.setVisibility(false);
 		this.fwFeatureLayer_qfx.setVisibility(false);
 		this.fwFeatureLayer_fsss.setVisibility(false);		
 		this.fwFeatureLayer_dxkj.setVisibility(false);
-		//测量工具
-		this.drawToolbar = new Draw(map, {
+		//测量工具         
+		this.$root.drawToolbar = new Draw(this.$root.map, {
             tooltipOffset: 20,
             drawTime: 90
-        });console.log(this.drawToolbar)
+        });
+        this.$root.edittool = new Edit(this.$root.map, {
+            allowAddVertices: true,
+            allowDeleteVertices: true
+        }); debugger
+        console.log(this.$root.drawToolbar)
 	})
 	.catch(err => {
 	  console.error(err)

@@ -35,23 +35,29 @@ export default {
     data() {
       return {
         activeIndex: '1',
-        activeIndex2: '1'
+        activeIndex2: '1',
+        drawEvent:null
       };
     },
     methods: {
       	handleSelect(key, keyPath) {
         	console.log(key, keyPath);
 	        switch (key){
-	        	case "1-1":console.log(this)
-//	        		this.$parent.__drawToolbar.activate(esri.toolbars.Draw.POLYLINE);
-//			        this.$parent.__drawEvent = dojo.connect(__drawToolbar, 'onDrawEnd', areaOrLength);
+	        	case "1-1":
+	        		this.$root.drawToolbar.activate(esri.toolbars.Draw.POLYLINE);
+			        this.drawEvent = dojo.connect(this.$root.drawToolbar, 'onDrawEnd', this.areaOrLength);
 	        		break;
+	        	case "1-2":console.log(this.$root)
+			        this.$root.drawToolbar.activate(esri.toolbars.Draw.POLYGON);
+	        		if (this.drawEvent) dojo.disconnect(this.drawEvent);
+	        		this.drawEvent = dojo.connect(this.$root.drawToolbar, 'onDrawEnd', this.areaOrLength);
+	        		break;	        		
 	        	default:
 	        		break;
 	        }
         },
  		areaOrLength(geometry) {
-		    mapClear();
+		    this.mapClear();
 		    geometry.spatialReference.wkid = 2436;
 		    switch (geometry.type) {
 		        case "point":
@@ -70,12 +76,12 @@ export default {
 		                var y1 = points[i][0];
 		                var x2 = points[i + 1][1];
 		                var y2 = points[i + 1][0];
-		                distance = getFlatternDistance2(x1, y1, x2, y2);
+		                distance = this.getFlatternDistance2(x1, y1, x2, y2);
 		                lineLength = distance += lineLength;
 		            }
 		            lengths['0'] = lineLength;
 		            result.lengths = lengths;
-		            outputAreaAndLength(result, geometry);//result获得平面坐标
+		            this.outputAreaAndLength(result, geometry);//result获得平面坐标
 		            break;
 		        case "polygon":
 		            var symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_NULL, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 0, 0]), 1), new dojo.Color([255, 255, 0, 0]));
@@ -90,25 +96,25 @@ export default {
 		//              points.push(xy);
 						points.push([x,y]);
 		            }
-		            areas['0'] = polygonArea(points);
+		            areas['0'] = this.polygonArea(points);
 		            result.areas = areas;
-		            outputAreaAndLength(result, geometry);
+		            this.outputAreaAndLength(result, geometry);
 		            break;
 		    }
 	    var graphic = new esri.Graphic(geometry, symbol);
-	    map.graphics.clear();
-	    map.graphics.add(graphic);
-	    __drawToolbar.deactivate();
-	    dojo.disconnect(__drawEvent);
-	    __drawEvent = null;
+	    this.$root.map.graphics.clear();
+	    this.$root.map.graphics.add(graphic);console.log(2,this.$root.drawToolbar)
+	    this.$root.drawToolbar.deactivate();
+	    dojo.disconnect(this.drawEvent);
+	    this.drawEvent = null;
 	},
 	mapClear() {
-	    map.graphics.clear();
-	    map.infoWindow.hide();	    
+	    this.$root.map.graphics.clear();
+	    this.$root.map.infoWindow.hide();	    
 	},
 	outputAreaAndLength(result, geo) {
 	    var point = geo.getExtent().getCenter();
-	    map.infoWindow.resize(270, 300);//设置窗口大小
+	    this.$root.map.infoWindow.resize(270, 300);//设置窗口大小
 	    var txt = "";
 	    if (result.areas != null) {
 	        var num = result.areas[0].toFixed(2);
@@ -118,9 +124,9 @@ export default {
 	            if (num / 1000000 > 999)
 	                info = (num / 1000000 / 10000).toFixed(2) + "万平方千米";
 	        }
-	        map.infoWindow.setTitle("面积测算");
-	        map.infoWindow.setContent("面积：" + info);
-	        map.infoWindow.show(point);
+	        this.$root.map.infoWindow.setTitle("面积测算");
+	        this.$root.map.infoWindow.setContent("面积：" + info);
+	        this.$root.map.infoWindow.show(point);
 	    } else {
 	        var num = result.lengths[0].toFixed(2);
 	        var info = num + "米";
@@ -129,11 +135,27 @@ export default {
 	            if (num / 1000 > 999)
 	                info = (num / 1000 / 10000).toFixed(2) + "万千米";
 	        }
-	        map.infoWindow.setTitle("长度测算");
-	        map.infoWindow.setContent("距离：" + info);
-	        map.infoWindow.show(point);
+	        this.$root.map.infoWindow.setTitle("长度测算");
+	        this.$root.map.infoWindow.setContent("距离：" + info);
+	        this.$root.map.infoWindow.show(point);
 	    }
 	},
+	getFlatternDistance2(lat1, lng1, lat2, lng2) {
+	    return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lng1 - lng2, 2));
+	},
+	polygonArea(points) {
+	    var i, j;
+	    var area = 0;
+	    for (i = 0; i < points.length; i++) {
+	        j = (i + 1) % points.length;
+	        area += points[i][0] * points[j][1];
+	        area -= points[i][1] * points[j][0];
+	    }
+	    area /= 2;
+	    var mianji = Math.abs(area);
+	    return mianji;
+	},
+
     }
   }
 
