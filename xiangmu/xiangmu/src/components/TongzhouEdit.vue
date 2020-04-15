@@ -43,15 +43,54 @@ export default {
       	handleSelect(key, keyPath) {
         	console.log(key, keyPath);
 	        switch (key){
-	        	case "1-1":
+	        	case "1-1"://长度测量
 	        		this.$root.drawToolbar.activate(esri.toolbars.Draw.POLYLINE);
 			        this.drawEvent = dojo.connect(this.$root.drawToolbar, 'onDrawEnd', this.areaOrLength);
 	        		break;
-	        	case "1-2":console.log(this.$root)
+	        	case "1-2"://面积测量
 			        this.$root.drawToolbar.activate(esri.toolbars.Draw.POLYGON);
 	        		if (this.drawEvent) dojo.disconnect(this.drawEvent);
 	        		this.drawEvent = dojo.connect(this.$root.drawToolbar, 'onDrawEnd', this.areaOrLength);
-	        		break;	        		
+	        		break;	
+	        	case "1-3"://前一视图
+					/*
+			 * 这里是关于前后试图操作的
+			 */
+//			var zoomprev = document.getElementById("zoomprev");
+//			var zoomnext = document.getElementById("zoomnext");
+//			var navToolbar = new Navigation(map);
+//			navToolbar.on("extent-history-change", extentHistoryChangeHandler);
+//			//前后视图函数
+//			function extentHistoryChangeHandler() {
+//				/*
+//				 * 如果是isFirstExtent，则返回为ture,则zoomprev应该为不可用
+//				 */
+//				zoomprev.disabled = navToolbar.isFirstExtent();
+//				zoomnext.disabled = navToolbar.isLastExtent();
+//			}
+//			zoomnext.addEventListener("click", function() {
+//				if(!zoomnext.disabled) {
+//					navToolbar.zoomToNextExtent();
+//					zoomprev.disabled = navToolbar.isFirstExtent();
+//					zoomnext.disabled = navToolbar.isLastExtent();
+//				}
+//
+//			});
+//			zoomprev.addEventListener("click", function() {
+//				if(!zoomprev.disabled) {
+//					navToolbar.zoomToPrevExtent();
+//					zoomprev.disabled = navToolbar.isFirstExtent();
+//					zoomnext.disabled = navToolbar.isLastExtent();
+//				}
+//
+//			});
+	        		break;
+	        	case "1-4"://后一视图
+
+	        		break;
+	        	case "1-5"://书签
+
+	        		break;
 	        	default:
 	        		break;
 	        }
