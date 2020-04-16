@@ -197,7 +197,7 @@ export default {
     methods: {
     	handleCheckChange (data, checked, indeterminate) {//传递给 data 属性的数组中该节点所对应的对象、节点本身是否被选中、节点的子树中是否有被选中的节点
 		  /* 主要通过checked进行判断 */
-		  if (checked) {
+		  if (checked) {debugger
 		  	this.clickid=data.id;//不同层级切换时，如果切换到的状态为选中，则通过一个变量先保存下它的id，与后面再度切换进行对边（查看是不是不同层级的切换）
 		    let arrclick = [data.id];
 		    this.$refs.tree.setCheckedKeys(arrclick);
@@ -222,7 +222,10 @@ export default {
 		  }
 		  if(!checked &&(data.id==this.clickid)){//如果点击是选中的本身 还是将选中赋值给自身
 		  	this.$refs.tree.setCheckedKeys([data.id]);
-		  }		  
+		  }	
+		  if(!checked && data.id==72 && this.clickid=="1"){//如果点击是选中的本身 还是将选中赋值给自身
+		  	this.$refs.tree.setCheckedKeys(["72"]);
+		  }
 		}, 
 		handleCheckChangeTree(data, checked, indeterminate){//树形控件 大tree
 			switch (data.id) {
